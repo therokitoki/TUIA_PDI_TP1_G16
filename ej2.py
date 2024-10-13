@@ -1,6 +1,44 @@
+from cProfile import label
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
+def answer_line(roi):
+    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 40, 255, cv2.THRESH_BINARY)  
+    pixel_negros = np.sum(thresh == 0, axis=1)  
+    #print(pixel_negros)
+    indice = np.argmax(pixel_negros) #row con mayoria de pixeles negros
+    cv2.line(roi, (0, indice), (roi.shape[1], indice), (255, 0, 0), 1)  
+    imshow(roi)
+    return indice
+
+def opcion2(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    umbral, thresh_img = cv2.threshold(gray, thresh=40, maxval=255, type=cv2.THRESH_BINARY)
+    connectivity = 4
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, connectivity, cv2.CV_32S)  # https://docs.opencv.org/4.5.3/d3/dc0/group__imgproc__shape.html#ga107a78bf7cd25dec05fb4dfc5c9e765f
+    
+    # --- Otra opcion ----------------
+    # output = cv2.connectedComponentsWithStats(img, connectivity, cv2.CV_32S)
+    # # Resultados
+    # num_labels = output[0]  # Cantidad de elementos
+    # labels = output[1]      # Matriz con etiquetas
+    # stats = output[2]       # Matriz de stats
+    # centroids = output[3]   # Centroides de elementos
+    # --------------------------------
+    print(stats)
+    imshow(img=labels)
+
+    # Coloreamos los elementos
+    labels = np.uint8(255/num_labels*labels)
+    # imshow(img=labels)
+    im_color = cv2.applyColorMap(labels, cv2.COLORMAP_JET)
+    for centroid in centroids:
+        cv2.circle(im_color, tuple(np.int32(centroid)), 9, color=(255,255,255), thickness=-1)
+    for st in stats:
+        cv2.rectangle(im_color, (st[0], st[1]), (st[0]+st[2], st[1]+st[3]), color=(0,255,0), thickness=2)
+    imshow(img=im_color, color_img=True)
 
 # Defininimos función para mostrar imágenes
 def imshow(img, new_fig=True, title=None, color_img=False, blocking=True, colorbar=True, ticks=False):
@@ -17,6 +55,7 @@ def imshow(img, new_fig=True, title=None, color_img=False, blocking=True, colorb
         plt.colorbar()
     if new_fig:        
         plt.show(block=blocking)
+
 
 def line_detector(src : np.ndarray, th : int, for_roi = False) -> list[list[tuple]]:
     gray = cv2.cvtColor(src, cv2.IMREAD_GRAYSCALE)   # Transformamos la imagen a grayscale
@@ -70,6 +109,7 @@ def line_detector(src : np.ndarray, th : int, for_roi = False) -> list[list[tupl
                     final_line_list.append(new_line)
     return final_line_list
 
+
 def line_orientation(line_list : list[list[tuple]]) -> list[list[tuple]]:
     # Ahora debería:
     #   - Delimitar los cuadrados con las intersecciones de las líneas
@@ -90,6 +130,7 @@ def line_orientation(line_list : list[list[tuple]]) -> list[list[tuple]]:
     v_lines.sort(key = lambda x: x[0])
 
     return h_lines, v_lines
+
 
 def question_roi_detector(v_lines : list, h_lines : list, img : np.ndarray, show = True) -> list[np.ndarray]:
     # Creamos los roi
@@ -114,10 +155,11 @@ def question_roi_detector(v_lines : list, h_lines : list, img : np.ndarray, show
                 imshow(roi)
             roi_list.append(roi)
     return (roi_list)
-            
+
+
 # Leemos la imagen a color y la pasamos a esacala de grises
-img = cv2.imread('examen_3.png')
-# img = cv2.imread('examen_3.png', cv2.IMREAD_GRAYSCALE)   # Leemos imagen
+img = cv2.imread('examen_2.png')
+#img2 = cv2.imread('examen_3.png', cv2.IMREAD_GRAYSCALE)   # Leemos imagen
 
 # Graficamos las nuevas líneas
 line_list = line_detector(img, 200)
@@ -133,9 +175,19 @@ h_lines, v_lines = line_orientation(line_list)
 questions = question_roi_detector(v_lines, h_lines, img, show= False)
 
 for question in questions:
-    answer_line = line_detector(question, 100, for_roi=True)
-    img_lines_new = question.copy()
+    # umbral, thresh_img = cv2.threshold(question, thresh=40, maxval=255, type=cv2.THRESH_BINARY)
+    # imshow(thresh_img)
+    # answer_line = line_detector(thresh_img, 70, for_roi=True)
+    # img_lines_new = question.copy()
 
-    for i in answer_line:
-        cv2.line(img_lines_new,i[0],i[1],(0,255,0),1)
-    imshow(img_lines_new,title='Img con lineas post fix')
+    # for i in answer_line:
+    #     cv2.line(img_lines_new,i[0],i[1],(0,255,0),1)
+    # imshow(img_lines_new,title='Img con lineas post fix')
+    # img_th = question < 50
+    # img_rows= np.sum(img_th,1)
+    # print(img_rows)
+    #indice = answer_line(question)
+    opcion2(question)
+
+
+
