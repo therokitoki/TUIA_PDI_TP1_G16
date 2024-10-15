@@ -86,11 +86,11 @@ ax = plt.subplot(2,4,1)
 plt.imshow(img, cmap='gray')
 plt.title('Imagen original')
 
-for i in range(0,len(win_sizes)):
-    img_eq = localHistEQ(img, win_sizes[i][0], win_sizes[i][1])
+for i, (w, h) in enumerate(win_sizes):
+    img_eq = localHistEQ(img, w, h)
     plt.subplot(2, 4, i+2,sharex=ax,sharey=ax) # 'sharex' y 'sharey' permiten compartir los ejes con la imagen original para mantener la escala.
     plt.imshow(img_eq,cmap='gray')
-    plt.title(f'Ventana {win_sizes[i][0]}x{win_sizes[i][1]}')
+    plt.title(f'Ventana {w}x{h}')
 
 # Se muestran todas las imágenes procesadas.  
 plt.show()
