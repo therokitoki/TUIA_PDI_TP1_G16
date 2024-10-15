@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 # *                               Declaración de Funciones                                 *
 # ******************************************************************************************
 
-def local_hist_eq(img: np.ndarray, width: int, height: int) -> np.ndarray:
+def localHistEQ(img: np.ndarray, width: int, height: int) -> np.ndarray:
     
     """
     Implementa la ecualización local del histograma. 
@@ -87,7 +87,7 @@ plt.imshow(img, cmap='gray')
 plt.title('Imagen original')
 
 for i in range(0,len(win_sizes)):
-    img_eq = local_hist_eq(img, win_sizes[i][0], win_sizes[i][1])
+    img_eq = localHistEQ(img, win_sizes[i][0], win_sizes[i][1])
     plt.subplot(2, 4, i+2,sharex=ax,sharey=ax) # 'sharex' y 'sharey' permiten compartir los ejes con la imagen original para mantener la escala.
     plt.imshow(img_eq,cmap='gray')
     plt.title(f'Ventana {win_sizes[i][0]}x{win_sizes[i][1]}')
