@@ -16,25 +16,52 @@ def answer_line(roi):
 def opcion2(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     umbral, thresh_img = cv2.threshold(gray, 150, 255, type=cv2.THRESH_BINARY_INV)
-    imshow(thresh_img)
+    #imshow(thresh_img)
     num_labels, labels_im = cv2.connectedComponents(thresh_img)
 
     # Dibuja las componentes conectadas
     output = np.zeros(img.shape, dtype=np.uint8)
-
     # Crear una máscara para dibujar solo las componentes que podrían ser líneas
     for label in range(1, num_labels):
+        
         component_mask = (labels_im == label).astype("uint8") * 255
         x, y, w, h = cv2.boundingRect(component_mask)
         
         # Filtrar por el tamaño de las componentes, asumiendo que la línea es la más larga y delgada
         aspect_ratio = w / h
         if aspect_ratio > 5:  # Línea larga y delgada
-            cv2.rectangle(img, (x, y), (x+w, y-15), (0, 255, 0), 1)
+            test = gray.copy()
+            z = y-14
+            crop = test[z:z+14, x:x+w,]
+            # b = 33
+            # d = 29
+            # a = 28
+            # c = 22
+            
+            pixeles_debajo_150 = crop < 150
+            cantidad_pixeles = np.sum(pixeles_debajo_150)
+
+            if cantidad_pixeles == 33:
+                #valores.append("B")
+                valores= 'B'
+            elif cantidad_pixeles == 29:
+                valores= 'D'
+            elif cantidad_pixeles == 28:
+                valores= 'A'
+            elif cantidad_pixeles == 22:
+                valores= 'C'
+            elif cantidad_pixeles == 0:
+                valores="NO RESPONDE"
+            else:
+                valores="INVÁLIDO"
+
+            cv2.rectangle(img, (x, y), (x+w, y-14), (0, 255, 0), 1)
+            #imshow(crop)
             output = cv2.bitwise_or(output, cv2.merge([component_mask, component_mask, component_mask]))
 
     # Mostrar la imagen con la línea detectada
-    imshow(img)
+    #imshow(img)
+    return(valores)
 
 # Defininimos función para mostrar imágenes
 def imshow(img, new_fig=True, title=None, color_img=False, blocking=True, colorbar=True, ticks=False):
@@ -169,21 +196,16 @@ imshow(img_lines_new,title='Img con lineas post fix')
 h_lines, v_lines = line_orientation(line_list)
 
 questions = question_roi_detector(v_lines, h_lines, img, show= False)
-
+valores=[]
 for question in questions:
-    # umbral, thresh_img = cv2.threshold(question, thresh=40, maxval=255, type=cv2.THRESH_BINARY)
-    # imshow(thresh_img)
-    # answer_line = line_detector(thresh_img, 70, for_roi=True)
-    # img_lines_new = question.copy()
+    valores.append(opcion2(question))
+print(f'Las respuestas fueron 1:{valores[0]} 2:{valores[1]} 3:{valores[2]} 4:{valores[3]} 5:{valores[4]} 6:{valores[5]} 7:{valores[6]} 8:{valores[7]} 9:{valores[8]} 10:{valores[9]}')
+correctos = ['C','B','A','D','B','B','A','B','D','D']
+correccion= []
+for i in range(0,10):
+    if valores[i] == correctos[i]:
+        correccion.append('OK')
+    else:
+        correccion.append('MAL')
 
-    # for i in answer_line:
-    #     cv2.line(img_lines_new,i[0],i[1],(0,255,0),1)
-    # imshow(img_lines_new,title='Img con lineas post fix')
-    # img_th = question < 50
-    # img_rows= np.sum(img_th,1)
-    # print(img_rows)
-    #indice = answer_line(question)
-    opcion2(question)
-
-
-
+print(f'Pregunta 1: {correccion[0]}\nPregunta 2: {correccion[1]}\nPregunta 3: {correccion[2]}\nPregunta 4: {correccion[3]}\nPregunta 5: {correccion[4]}\nPregunta 6: {correccion[5]}\nPregunta 7: {correccion[6]}\nPregunta 8: {correccion[7]}\nPregunta 9: {correccion[8]}\nPregunta 10: {correccion[9]}')
