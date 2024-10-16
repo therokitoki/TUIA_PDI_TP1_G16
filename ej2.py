@@ -23,38 +23,44 @@ def opcion2(img):
     output = np.zeros(img.shape, dtype=np.uint8)
     # Crear una máscara para dibujar solo las componentes que podrían ser líneas
     for label in range(1, num_labels):
-        
+
         component_mask = (labels_im == label).astype("uint8") * 255
         x, y, w, h = cv2.boundingRect(component_mask)
-        
+
         # Filtrar por el tamaño de las componentes, asumiendo que la línea es la más larga y delgada
         aspect_ratio = w / h
         if aspect_ratio > 5:  # Línea larga y delgada
-            test = gray.copy()
+            test = img.copy()
             z = y-14
             crop = test[z:z+14, x:x+w,]
             # b = 33
             # d = 29
             # a = 28
             # c = 22
-            
-            pixeles_debajo_150 = crop < 150
+            gray2 = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+            pixeles_debajo_150 = gray2 < 150
             cantidad_pixeles = np.sum(pixeles_debajo_150)
-
-            if cantidad_pixeles == 33:
-                #valores.append("B")
-                valores= 'B'
-            elif cantidad_pixeles == 29:
-                valores= 'D'
-            elif cantidad_pixeles == 28:
-                valores= 'A'
-            elif cantidad_pixeles == 22:
-                valores= 'C'
+            umbral, thresh_img2 = cv2.threshold(gray2, thresh=230, maxval=255, type=cv2.THRESH_BINARY)
+            if cantidad_pixeles > 40:
+                valores= 'INVÁLIDO'
             elif cantidad_pixeles == 0:
-                valores="NO RESPONDE"
+                valores= 'NO RESPONDE'
             else:
-                valores="INVÁLIDO"
+                contours, hierarchy = cv2.findContours(thresh_img2, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                cv2.drawContours(crop, contours, contourIdx=-1, color=(0, 0, 255), thickness=1)  # https://docs.opencv.org/3.4/d6/d6e/group__imgproc__draw.html#ga746c0625f1781f1ffc9056259103edbc
 
+                if len(hierarchy[0])==4:
+                    valores= 'B'
+                elif len(hierarchy[0])==2:
+                    valores= 'C'
+                else:
+                    print("Entreeeee")
+                    connectivity = 8
+                    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img2, connectivity, cv2.CV_32S)
+                    if stats[2][4]<15:
+                        valores= 'A'
+                    else:
+                        valores= 'D'
             cv2.rectangle(img, (x, y), (x+w, y-14), (0, 255, 0), 1)
             #imshow(crop)
             output = cv2.bitwise_or(output, cv2.merge([component_mask, component_mask, component_mask]))
@@ -76,7 +82,7 @@ def imshow(img, new_fig=True, title=None, color_img=False, blocking=True, colorb
         plt.xticks([]), plt.yticks([])
     if colorbar:
         plt.colorbar()
-    if new_fig:        
+    if new_fig:
         plt.show(block=blocking)
 
 
@@ -91,14 +97,14 @@ def line_detector(src : np.ndarray, th : int, for_roi = False) -> list[list[tupl
     # Creo las líneas rectas con HoughLines
     src_lines = src.copy()
     lines = cv2.HoughLines(edges, rho=1, theta=np.pi/180, threshold=th)   # https://docs.opencv.org/3.4/dd/d1a/group__imgproc__feature.html#ga46b4e588934f6c8dfd509cc6e0e4545a
-    
+
     if lines is None:
         th = th - 10
         lines = cv2.HoughLines(edges, rho=1, theta=np.pi/180, threshold=th)
     line_list = []
     for i in range(0, len(lines)):
         rho = lines[i][0][0]
-        theta = lines[i][0][1]        
+        theta = lines[i][0][1]
         a=np.cos(theta)
         b=np.sin(theta)
         x0=a*rho
@@ -109,7 +115,7 @@ def line_detector(src : np.ndarray, th : int, for_roi = False) -> list[list[tupl
         y2=int(y0-1000*(a))
         line_list.append([(x1,y1),(x2,y2)])
         cv2.line(src_lines,(x1,y1),(x2,y2),(0,255,0),1)
-    
+
     if not for_roi:
         imshow(src_lines,title='Imagen con lineas pre fix')
 
@@ -164,15 +170,15 @@ def question_roi_detector(v_lines : list, h_lines : list, img : np.ndarray, show
         x1 = int(v_lines[idx_v][0][0])
         x2 = int(v_lines[idx_v + 1][0][0])
         idx_v += 2
-        
+
         idx_h = 1
-        
+
         for i in range(1, len(h_lines) - 1):
             # Recorto la celda de la imagen en escala de grises
             y1 = int(h_lines[idx_h][0][1])
             y2 = int(h_lines[idx_h + 1][0][1])
             idx_h += 1
-            
+
             roi = img[y1+4:y2-4, x1+4:x2-4]
             if show:
                 imshow(roi)
@@ -181,7 +187,7 @@ def question_roi_detector(v_lines : list, h_lines : list, img : np.ndarray, show
 
 
 # Leemos la imagen a color y la pasamos a esacala de grises
-img = cv2.imread('examen_2.png')
+img = cv2.imread('examen_5.png')
 #img2 = cv2.imread('examen_3.png', cv2.IMREAD_GRAYSCALE)   # Leemos imagen
 
 # Graficamos las nuevas líneas
