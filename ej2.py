@@ -215,3 +215,110 @@ for i in range(0,10):
         correccion.append('MAL')
 
 print(f'Pregunta 1: {correccion[0]}\nPregunta 2: {correccion[1]}\nPregunta 3: {correccion[2]}\nPregunta 4: {correccion[3]}\nPregunta 5: {correccion[4]}\nPregunta 6: {correccion[5]}\nPregunta 7: {correccion[6]}\nPregunta 8: {correccion[7]}\nPregunta 9: {correccion[8]}\nPregunta 10: {correccion[9]}')
+
+##################################################################################################################################################################################
+########################################################################### TPT ESTUVO AQUÍ ######################################################################################
+##################################################################################################################################################################################
+
+# *******************************************************
+# *                 Defino Funciones                    *
+# *******************************************************
+
+def headerDetector(h_lines: list, img: np.ndarray, show: bool = True) -> np.ndarray:
+
+    x1 = 0
+    x2 = img.shape[1]
+    y1 = 0
+    y2 = int(h_lines[0][0][1]) + 10
+
+    roi = img[y1+4:y2-4, x1+4:x2-4]
+
+    if show:
+      imshow(roi)
+
+    return roi
+
+
+def headerSectionsDetector(img: np.ndarray, show: bool = True) -> list:
+  sections = []
+  gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  umbral, thresh_img = cv2.threshold(gray, 150, 255, type=cv2.THRESH_BINARY_INV)
+  #imshow(thresh_img)
+  num_labels, labels_im = cv2.connectedComponents(thresh_img)
+
+  # Dibuja las componentes conectadas
+  output = np.zeros(img.shape, dtype=np.uint8)
+  # Crear una máscara para dibujar solo las componentes que podrían ser líneas
+  for label in range(1, num_labels):
+
+    component_mask = (labels_im == label).astype("uint8") * 255
+    x, y, w, h = cv2.boundingRect(component_mask)
+
+
+    # Filtrar por el tamaño de las componentes, asumiendo que la línea es la más larga y delgada
+    aspect_ratio = w / h
+    if aspect_ratio > 5:  # Línea larga y delgada
+      test = img.copy()
+      z = y - 20
+      roi = test[z:z+16, x:x+w,]
+      sections.append(roi)
+      if show:
+        imshow(roi)
+
+  return sections
+
+
+def headerValidator(img: np.ndarray, field: str = 'name') -> bool:
+  gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+  umbral, thresh_img = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
+
+  # Aplico connectedComponentsWithStats para contar componentes conectadas
+  num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, connectivity=8)
+
+  field = field.lower()
+
+  # Valido parámetro field
+  if field not in ['name', 'date', 'class']:
+    raise ValueError("El parámetro field debe ser 'name', 'date' o 'class'")
+
+  if field == 'name':
+    # Verifico que el número de componentes conectadas sea al menos 3 (2 correspondientes al nombre y apellido y una por el fondo de la imagen)
+    if num_labels >= 3:  
+          
+      # Verifico la existencia de un espacio entre "Nombre" y "Apellido"
+      x_ant = stats[1][0]
+      for i in range(2, num_labels):
+          x, y, w, h, a = stats[i]
+          if x - x_ant > 12:
+              return True
+          x_ant = x
+    
+    return False
+
+  elif field == 'date':
+    # Verifico que el número de componentes conectadas sea 8 (8 correspondientes a la fecha y una por el fondo de la imagen)
+    if num_labels == 9:
+      return True
+    
+    return False
+
+  else:
+    # Verifico que el número de componentes conectadas sea 2 (1 correspondiente a la clase y una por el fondo de la imagen)
+    if num_labels == 2:
+      return True
+    
+    return False
+  
+# *******************************************************
+# *                    Implemento                       *
+# *******************************************************
+img_prb = headerDetector(h_lines, img)
+    
+nombre, fecha, clase = headerSectionsDetector(img_prb, False)
+
+nombre_ok = headerValidator(nombre, 'name')
+fecha_ok = headerValidator(fecha, 'date')
+clase_ok = headerValidator(clase, 'class')
+
+print(f'Nombre: {nombre_ok}\nFecha: {fecha_ok}\nClase: {clase_ok}')
