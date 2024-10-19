@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 # ******************************************************************************************
 
 def localHistEQ(img: np.ndarray, width: int, height: int) -> np.ndarray:
-    
+
     """
     Implementa la ecualización local del histograma. 
 

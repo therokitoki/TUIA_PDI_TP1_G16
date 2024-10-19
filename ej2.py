@@ -1,14 +1,61 @@
+############################################################################################
+#                                                                                          #
+#                              PROCESAMIENTO DE IMÁGENES 1                                 #
+#                                 TRABAJO PRÁCTICO N°1                                     #
+#                                                                                          #
+#          GRUPO N°16: Gonzalo Asad, Sergio Castells, Agustín Alsop, Rocio Hachen          #                                                                                          
+#                                                                                          #
+#                       Problema 2 - Corrección de múltiple choice                         #
+#                                                                                          #
+############################################################################################
+
 from cProfile import label
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-def letterAnswer(list_letter_box: list[np.ndarray]) -> str:
-    # b = 33
-    # d = 29
-    # a = 28
-    # c = 22
-    letter_box = cv2.cvtColor(list_letter_box[0], cv2.COLOR_BGR2GRAY)
+# ******************************************************************************************
+# *                               Declaración de Funciones                                 *
+# ******************************************************************************************
+def imshow(img, new_fig=True, title=None, color_img=False, blocking=True, colorbar=True, ticks=False):
+    """
+    Función para visualizar imágenes
+
+    Parámetros:
+        img: Imagen a procesar (en escala de grises)
+        new_: Ancho de la ventana de procesamiento (entero, positivo, impar)
+        height: Alto de la ventana de procesamiento (entero, positivo, impar)
+
+    Retorno:
+        str: Letra identificada
+    """
+    if new_fig:
+        plt.figure()
+    if color_img:
+        plt.imshow(img)
+    else:
+        plt.imshow(img, cmap='gray')
+    plt.title(title)
+    if not ticks:
+        plt.xticks([]), plt.yticks([])
+    if colorbar:
+        plt.colorbar()
+    if new_fig:
+        plt.show(block=blocking)
+
+def letterAnswer(letter_box: np.ndarray) -> str:
+
+    """
+    Identifica una letra a partir de una imagen.
+
+    Parámetros:
+        letter_box: imagen a procesar
+
+    Retorno:
+        str: Letra identificada
+    """
+
+    letter_box = cv2.cvtColor(letter_box, cv2.COLOR_BGR2GRAY)
     pixeles_debajo_150 = letter_box < 150
     cantidad_pixeles = np.sum(pixeles_debajo_150)
     _, thresh_img = cv2.threshold(letter_box, thresh=230, maxval=255, type=cv2.THRESH_BINARY)
@@ -31,22 +78,6 @@ def letterAnswer(list_letter_box: list[np.ndarray]) -> str:
             else:
                 letter= 'D'
     return(letter)
-
-# Defininimos función para mostrar imágenes
-def imshow(img, new_fig=True, title=None, color_img=False, blocking=True, colorbar=True, ticks=False):
-    if new_fig:
-        plt.figure()
-    if color_img:
-        plt.imshow(img)
-    else:
-        plt.imshow(img, cmap='gray')
-    plt.title(title)
-    if not ticks:
-        plt.xticks([]), plt.yticks([])
-    if colorbar:
-        plt.colorbar()
-    if new_fig:
-        plt.show(block=blocking)
 
 
 def line_detector(src : np.ndarray, th : int, for_roi = False) -> list[list[tuple]]:
@@ -242,11 +273,17 @@ def headerValidator(img: np.ndarray, field: str = 'name') -> bool:
 # *******************************************************
 # *                    Implemento                       *
 # *******************************************************
+bien_img = cv2.imread('BIEN.png')
+mal_img = cv2.imread('MAL.png')
+desaprobado_img = cv2.imread('DESAPROBADO.png')
+aprobado_img = cv2.imread('APROBADO.png')
+planilla_img = cv2.imread('PLANILLA.png')
 
 # Leemos la imagen a color y la pasamos a esacala de grises
-for i in range(1,6):
+desp_hori = 0
+for examen in range(1,6):
 
-    img = cv2.imread(f'examen_{i}.png')
+    img = cv2.imread(f'examen_{examen}.png')
 
     # Graficamos las nuevas líneas
     line_list = line_detector(img, 200)
@@ -263,24 +300,47 @@ for i in range(1,6):
     answers=[]
     for question in questions:
         letter_box = letterBoxDetector(img= question, show= False, header = False)
-        answers.append(letterAnswer(letter_box))
+        answers.append(letterAnswer(letter_box[0]))
     print(f'Las respuestas fueron 1:{answers[0]} 2:{answers[1]} 3:{answers[2]} 4:{answers[3]} 5:{answers[4]} 6:{answers[5]} 7:{answers[6]} 8:{answers[7]} 9:{answers[8]} 10:{answers[9]}')
     correctos = ['C','B','A','D','B','B','A','B','D','D']
     correccion= []
+    desp_vert = 0
+    puntos_positivos= 0
     for i in range(0,10):
         if answers[i] == correctos[i]:
+            puntos_positivos += 1
             correccion.append('OK')
+            planilla_img[288+desp_vert:288+desp_vert + bien_img.shape[0], 195+desp_hori:195+desp_hori+bien_img.shape[1]] = bien_img
         else:
             correccion.append('MAL')
+            planilla_img[288+desp_vert:288+desp_vert + mal_img.shape[0], 195+desp_hori:195+desp_hori+mal_img.shape[1]] = mal_img
+        desp_vert += bien_img.shape[0] - 2
 
     print(f'Pregunta 1: {correccion[0]}\nPregunta 2: {correccion[1]}\nPregunta 3: {correccion[2]}\nPregunta 4: {correccion[3]}\nPregunta 5: {correccion[4]}\nPregunta 6: {correccion[5]}\nPregunta 7: {correccion[6]}\nPregunta 8: {correccion[7]}\nPregunta 9: {correccion[8]}\nPregunta 10: {correccion[9]}')
 
     img_prb = headerDetector(h_lines= h_lines, show= False, img= img)
 
     nombre, fecha, clase = letterBoxDetector(img_prb, False,header=True)
+    nombre_rs = cv2.resize(nombre  , (275 , 35))
+    planilla_img[245:245+ nombre_rs.shape[0], 10+desp_hori:10+desp_hori+nombre_rs.shape[1]] = nombre_rs
 
     nombre_ok = headerValidator(nombre, 'name')
     fecha_ok = headerValidator(fecha, 'date')
     clase_ok = headerValidator(clase, 'class')
-
+    header_check = [nombre_ok, fecha_ok, clase_ok]
+    for header in header_check:
+        if header:
+            planilla_img[288+desp_vert:288+desp_vert + bien_img.shape[0], 195+desp_hori:195+desp_hori+bien_img.shape[1]] = bien_img
+        else:
+            planilla_img[288+desp_vert:288+desp_vert + mal_img.shape[0], 195+desp_hori:195+desp_hori+mal_img.shape[1]] = mal_img
+        desp_vert += bien_img.shape[0] - 2
     print(f'Nombre: {nombre_ok}\nFecha: {fecha_ok}\nClase: {clase_ok}')
+
+    if puntos_positivos >= 6:
+        planilla_img[790:790+ aprobado_img.shape[0], 20+desp_hori:20+desp_hori+aprobado_img.shape[1]] = aprobado_img
+    else:
+        planilla_img[790:790+ desaprobado_img.shape[0], 20+desp_hori:20+desp_hori+desaprobado_img.shape[1]] = desaprobado_img
+
+    desp_hori += 300
+
+imshow(planilla_img)
