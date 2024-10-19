@@ -429,11 +429,11 @@ for examen in range(1,6):
     for question in questions:
         letter_box = letterBoxDetector(img= question, show= False, header = False)
         answers.append(letterAnswer(letter_box[0]))
-    
+
     print(f'\nExamen {examen}')
     print(f'Respuestas:')
     print(f'1:{answers[0]}, 2:{answers[1]}, 3:{answers[2]}, 4:{answers[3]}, 5:{answers[4]}, 6:{answers[5]}, 7:{answers[6]}, 8:{answers[7]}, 9:{answers[8]}, 10:{answers[9]}')
-    
+
     # Se crea la lista que contiene las respuestas correctas
     correctos = ['C','B','A','D','B','B','A','B','D','D']
     correccion= []
