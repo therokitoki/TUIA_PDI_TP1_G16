@@ -72,8 +72,9 @@ def localHistEQ(img: np.ndarray, width: int, height: int) -> np.ndarray:
 
 # Carga y visualización de la imagen original en escala de grises.
 # La imagen contiene detalles escondidos que se quieren resaltar mediante ecualización local del histograma.
-img = cv2.imread('Imagen_con_detalles_escondidos.tif', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('.\\img\\Imagen_con_detalles_escondidos.tif', cv2.IMREAD_GRAYSCALE)
 plt.imshow(img, cmap='gray')
+plt.title('Imagen original en escala de grises')
 plt.show()
 
 # Se define una lista de diferentes tamaños de ventanas para la ecualización local.
@@ -82,7 +83,7 @@ win_sizes = [(3,3),(5,5),(11,11),(21,11),(35,25),(51,51),(101,101)]
 
 # Se aplica ecualización local del histograma con ventanas de distintos tamaños.
 plt.figure(figsize=(14,8))
-ax = plt.subplot(2,4,1) 
+ax = plt.subplot(2,4,1)
 plt.imshow(img, cmap='gray')
 plt.title('Imagen original')
 

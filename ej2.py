@@ -390,11 +390,14 @@ def headerValidator(img: np.ndarray, field: str = 'name') -> bool:
 # *******************************************************
 
 # Lectura de plantillas
-bien_img = cv2.imread('BIEN.png')
-mal_img = cv2.imread('MAL.png')
-desaprobado_img = cv2.imread('DESAPROBADO.png')
-aprobado_img = cv2.imread('APROBADO.png')
-planilla_img = cv2.imread('PLANILLA.png')
+bien_img = cv2.imread('.\\img\\BIEN.png')
+mal_img = cv2.imread('.\\img\\MAL.png')
+desaprobado_img = cv2.imread('.\\img\\DESAPROBADO.png')
+desaprobado_img = cv2.cvtColor(desaprobado_img, cv2.COLOR_BGR2RGB)
+aprobado_img = cv2.imread('.\\img\\APROBADO.png')
+aprobado_img = cv2.cvtColor(aprobado_img, cv2.COLOR_BGR2RGB)
+planilla_img = cv2.imread('.\\img\\PLANILLA.png')
+planilla_img = cv2.cvtColor(planilla_img, cv2.COLOR_BGR2RGB)
 
 desp_hori = 0 # Desplazamiento horizontal
 
@@ -402,7 +405,7 @@ desp_hori = 0 # Desplazamiento horizontal
 for examen in range(1,6):
 
     # Lectura de imagen
-    img = cv2.imread(f'examen_{examen}.png')
+    img = cv2.imread(f'.\\img\\examen_{examen}.png')
 
     # Se identifican las líneas de la imagen
     line_list = lineDetector(img, 200)
@@ -462,7 +465,7 @@ for examen in range(1,6):
     nombre_rs = cv2.resize(nombre  , (275 , 35))
 
     # Se inserta el nombre del alumno en el reporte final
-    planilla_img[245:245+ nombre_rs.shape[0], 10+desp_hori:10+desp_hori+nombre_rs.shape[1]] = nombre_rs
+    planilla_img[242:242+ nombre_rs.shape[0], 12+desp_hori:12+desp_hori+nombre_rs.shape[1]] = nombre_rs
     
     # Se validan los datos del examen
     nombre_ok = headerValidator(nombre, 'name')
@@ -480,11 +483,11 @@ for examen in range(1,6):
     print(f'Nombre: {nombre_ok}\nFecha: {fecha_ok}\nClase: {clase_ok}')
 
     if puntos_positivos >= 6:
-        planilla_img[790:790+ aprobado_img.shape[0], 20+desp_hori:20+desp_hori+aprobado_img.shape[1]] = aprobado_img
+        planilla_img[794:794+ aprobado_img.shape[0], 20+desp_hori:20+desp_hori+aprobado_img.shape[1]] = aprobado_img
     else:
-        planilla_img[790:790+ desaprobado_img.shape[0], 20+desp_hori:20+desp_hori+desaprobado_img.shape[1]] = desaprobado_img
+        planilla_img[794:794+ desaprobado_img.shape[0], 20+desp_hori:20+desp_hori+desaprobado_img.shape[1]] = desaprobado_img
 
     desp_hori += 300
 
 # Visualización del reporte final
-imshow(planilla_img)
+imshow(planilla_img, colorbar= False)
