@@ -133,15 +133,16 @@ def letterAnswer(letter_box: np.ndarray) -> str:
             letter= 'B'
         elif len(hierarchy[0])==2:
             letter= 'C'
-
-        # Para diferenciar entre A y D, se analizan las áreas de los contornos
-        else:
+        elif len(hierarchy[0])==3:
+            # Para diferenciar entre A y D, se analizan las áreas de los contornos
             connectivity = 8
             num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, connectivity, cv2.CV_32S)
             if stats[2][4]<15:
                 letter= 'A'
             else:
                 letter= 'D'
+        else:
+            letter= 'INVÁLIDO'
     
     # Se retorna la letra identificada
     return(letter)
