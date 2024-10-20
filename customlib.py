@@ -435,7 +435,7 @@ def headerValidator(img: np.ndarray, field: str = 'name') -> bool:
             return False
 
     elif field == 'date':
-        # Se verifica que el número de componentes conectadas sea 8 (8 correspondientes a la fecha y una por el fondo de la imagen)
+        # Se verifica que el número de componentes conectadas sea 9 (8 correspondientes a la fecha y una por el fondo de la imagen)
         if num_labels == 9:
             return True
         return False
