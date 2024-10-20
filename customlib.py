@@ -239,8 +239,12 @@ def lineOrientation(line_list : list[list[tuple]]) -> tuple:
     for i in line_list:
         if i[0][0] == -1000:
             h_lines.append(i)
-        else:
+            print(f'Linea Horizontal {i[0][0]}')
+        elif i[0][1] == 1000:
             v_lines.append(i)
+            print(f'Linea Vertical {i[0][1]}')
+        else: # línea oblicua
+            pass
 
     # Las ordeno (me será útil más adelante)
     h_lines.sort(key = lambda x: x[1])
