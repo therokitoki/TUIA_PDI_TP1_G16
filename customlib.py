@@ -239,10 +239,8 @@ def lineOrientation(line_list : list[list[tuple]]) -> tuple:
     for i in line_list:
         if i[0][0] == -1000:
             h_lines.append(i)
-            print(f'Linea Horizontal {i[0][0]}')
         elif i[0][1] == 1000:
             v_lines.append(i)
-            print(f'Linea Vertical {i[0][1]}')
         else: # línea oblicua
             pass
 
@@ -422,8 +420,9 @@ def headerValidator(img: np.ndarray, field: str = 'name') -> bool:
 
     if field == 'name':
 
-        # Se verifica que el número de componentes conectadas sea al menos 3 (2 correspondientes al nombre y apellido y una por el fondo de la imagen)
-        if num_labels >= 3:
+        # Se verifica que el número de componentes conectadas sea mayor que 3 (2 correspondientes al nombre y apellido y una por el fondo de la imagen) y
+        # menor igual que 25 (24 correspondientes al nombre y apellido que sumado el espacio intermedio darian los 25 caracteres y uno mas por el fondo de la imagen)
+        if 25 >= num_labels >= 3:
 
         # Se verifica la existencia de un espacio entre "Nombre" y "Apellido"
             x_ant = stats[1][0]
