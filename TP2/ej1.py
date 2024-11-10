@@ -35,25 +35,25 @@ plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(brightLAB[:,:,1], cmap="gray"
 plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(brightLAB[:,:,2], cmap="gray"), plt.title('B')
 plt.show()
 
-# # Transformamos a HSV
+# Transformamos a HSV
 
-# bright_HSV = cv2.cvtColor(bright, cv2.COLOR_RGB2HSV)
+bright_HSV = cv2.cvtColor(bright, cv2.COLOR_RGB2HSV)
 
-# plt.figure()
-# ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
-# plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,0], cmap="gray"), plt.title('H')
-# plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,1], cmap="gray"), plt.title('S')
-# plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,2], cmap="gray"), plt.title('V')
+plt.figure()
+ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
+plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,0], cmap="gray"), plt.title('H')
+plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,1], cmap="gray"), plt.title('S')
+plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,2], cmap="gray"), plt.title('V')
 
-# # plt.show()
+plt.show()
 
-# bright_RGB = cv2.cvtColor(bright, cv2.COLOR_BGR2RGB)
+bright_RGB = cv2.cvtColor(bright, cv2.COLOR_BGR2RGB)
 
-# ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
-# plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,0], cmap="gray"), plt.title('R')
-# plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,1], cmap="gray"), plt.title('G')
-# plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,2], cmap="gray"), plt.title('B')
-# plt.show()
+ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
+plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,0], cmap="gray"), plt.title('R')
+plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,1], cmap="gray"), plt.title('G')
+plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,2], cmap="gray"), plt.title('B')
+plt.show()
 
 ############## Codigo con umbralado    
 #Cargar la imagen
@@ -104,7 +104,7 @@ blurred = cv2.GaussianBlur(gray, (11, 11), 0)
 plt.imshow(blurred)
 plt.show()
 
-edges = cv2.Canny(blurred, 30, 100)
+edges = cv2.Canny(blurred, 30, 80)
 
 plt.imshow(edges)
 plt.show()
@@ -120,7 +120,7 @@ for cnt in contours:
     perimetro = cv2.arcLength(cnt, True)
 
     #print(area, perimetro)
-    if perimetro < 50 or area < 1000:
+    if perimetro < 50:
         continue
     factor = area / (perimetro ** 2)
 
