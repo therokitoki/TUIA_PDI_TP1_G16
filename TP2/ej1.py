@@ -46,24 +46,25 @@ for contour in contours:
 plt.figure(figsize=(16, 8))
 
 #Imagen original
-plt.subplot(2, 2, 1)
+ax1 = plt.subplot(221)
 plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 plt.title("Imagen Original")
 plt.axis("off")
 
 #Detección de Bordes
-plt.subplot(2, 2, 2)
+plt.subplot(222, sharex = ax1, sharey = ax1)
 plt.imshow(edges, cmap="gray")
 plt.title("Umbralización Inicial")
 plt.axis("off")
 
 #Morfología
-plt.subplot(2, 2, 3)
+plt.subplot(223, sharex = ax1, sharey = ax1)
 plt.imshow(thresh_morph, cmap="gray")
 plt.title("Morfología")
 plt.axis("off")
 
 img_contornos = img.copy()
+img_final = img.copy()
 peso = 0
 cent_50 = 0
 cent_10 = 0
@@ -81,12 +82,11 @@ for contour in contours:
 
     # Calcular circularidad
     circularity = (4 * np.pi * area) / (perimeter ** 2)
-
+    # Coordenadas del contorno
+    x, y, w, h = cv2.boundingRect(contour)
     # Identificar formas
     if len(approx) == 4:
-        # Probable cuadrado
-        x, y, w, h = cv2.boundingRect(contour)
-
+        # Cuadrado
         # Recorta la región correspondiente al contorno
         cropped_region = thresh_morph[y:y+h, x:x+w]
 
@@ -97,25 +97,53 @@ for contour in contours:
         cropped_region = cv2.morphologyEx(cropped_region, cv2.MORPH_OPEN, kernel_open)
         _, hierarchy = cv2.findContours(cropped_region, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
         dados.append(len(hierarchy[0]))
+        #Dibujar el rectángulo
+        cv2.rectangle(img_final, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
+        #Agregar texto
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img_final, f'D: {len(hierarchy[0])}', (x+10, y-10), font, 2, (0, 0, 255), 4, cv2.LINE_AA)
 
     elif circularity > 0.2:
-        # Probable círculo
+        # círculo
         if area < 80000:
             cv2.drawContours(img_contornos, [contour], -1, (100, 100, 0), thickness=cv2.FILLED)
             cent_10 += 1
+
+            #Dibujar el rectángulo
+            cv2.rectangle(img_final, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
+            #Agregar texto
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(img_final, 'M: $0,1', (x+10, y-10), font, 2, (0, 0, 255), 4, cv2.LINE_AA)
+
         elif area >= 80000 and area < 100000:
             cv2.drawContours(img_contornos, [contour], -1, (50, 50, 0), thickness=cv2.FILLED)
             peso += 1
+
+            #Dibujar el rectángulo
+            cv2.rectangle(img_final, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
+            #Agregar texto
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(img_final, 'M: $1', (x+10, y-10), font, 2, (0, 0, 255), 4, cv2.LINE_AA)
         else:
             cv2.drawContours(img_contornos, [contour], -1, (10, 10, 0), thickness=cv2.FILLED)
             cent_50 += 1
+
+            #Dibujar el rectángulo
+            cv2.rectangle(img_final, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
+            #Agregar texto
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(img_final, 'M: $0,5', (x+10, y-10), font, 2, (0, 0, 255), 4, cv2.LINE_AA)
     else:
         # Otras formas
         cv2.drawContours(img_contornos, [contour], -1, (0, 255, 0), thickness=cv2.FILLED)
 
 
 #Contornos rellenados
-plt.subplot(2, 2, 4)
+plt.subplot(224, sharex = ax1, sharey = ax1)
 plt.imshow(cv2.cvtColor(img_contornos, cv2.COLOR_BGR2RGB))
 plt.title("Contornos Rellenados")
 plt.axis("off")
@@ -127,5 +155,9 @@ print(f'En total se detectaron {peso + cent_10 + cent_50} monedas')
 print(f'De 1 peso: {peso}')
 print(f'De 50 centavos: {cent_50}')
 print(f'De 10 centavos: {cent_10}')
-print(f'Ademas se detectaron {len(dados)} dados')
-print(f'Los dados tienen en su cara superior los numeros {dados}')
+print(f'Además se detectaron {len(dados)} dados')
+print(f'Los dados tienen en su cara superior los números {dados}')
+
+plt.imshow(cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB))
+plt.title("Detección Automática de Objetos")
+plt.show()
