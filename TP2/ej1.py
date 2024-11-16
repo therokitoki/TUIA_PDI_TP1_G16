@@ -3,131 +3,129 @@
 #                              PROCESAMIENTO DE IMÁGENES 1                                 #
 #                                 TRABAJO PRÁCTICO N°1                                     #
 #                                                                                          #
-#          GRUPO N°16: Gonzalo Asad, Sergio Castells, Agustín Alsop, Rocio Hachen          #                                                                                          
+#          GRUPO N°16: Gonzalo Asad, Sergio Castells, Agustín Alsop, Rocio Hachen          #
 #                                                                                          #
 #                       Problema 1 - Ecualización local de histograma                      #
 #                                                                                          #
-############################################################################################ 
+############################################################################################
 
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img_moneda = 'TP2\monedas.jpg'
+img_moneda = 'C:\\Users\\alsop\\Documents\\GitHub\\TUIA_PDI_TP1_G16\\TP2\\monedas.jpg'
 
-img = cv2.imread('TP2\monedas.jpg', cv2.IMREAD_GRAYSCALE)
-plt.imshow(img, cmap='gray')
-plt.title('Imagen original en escala de grises')
-plt.show()
-
-bright = cv2.imread(img_moneda)
-bright = cv2.cvtColor(bright, cv2.COLOR_BGR2RGB)
-
-
-# # Transformamos a CIELAB
-
-brightLAB = cv2.cvtColor(bright, cv2.COLOR_RGB2LAB)
-
-plt.figure()
-ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
-plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(brightLAB[:,:,0], cmap="gray"), plt.title('L')
-plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(brightLAB[:,:,1], cmap="gray"), plt.title('A')
-plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(brightLAB[:,:,2], cmap="gray"), plt.title('B')
-plt.show()
-
-# Transformamos a HSV
-
-bright_HSV = cv2.cvtColor(bright, cv2.COLOR_RGB2HSV)
-
-plt.figure()
-ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
-plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,0], cmap="gray"), plt.title('H')
-plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,1], cmap="gray"), plt.title('S')
-plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(bright_HSV[:,:,2], cmap="gray"), plt.title('V')
-
-plt.show()
-
-bright_RGB = cv2.cvtColor(bright, cv2.COLOR_BGR2RGB)
-
-ax1 = plt.subplot(141); plt.xticks([]), plt.yticks([]), plt.imshow(bright), plt.title('BRIGHT')
-plt.subplot(142,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,0], cmap="gray"), plt.title('R')
-plt.subplot(143,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,1], cmap="gray"), plt.title('G')
-plt.subplot(144,sharex=ax1,sharey=ax1), plt.imshow(bright_RGB[:,:,2], cmap="gray"), plt.title('B')
-plt.show()
-
-############## Codigo con umbralado    
-#Cargar la imagen
-img = cv2.imread(img_moneda)
-
-#Convertir a escala de grises
-#gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-gray = brightLAB[:,:,2]
-
-
-#Aplicar umbralización para binarizar la imagen
-thresh = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY)[1]
-plt.imshow(thresh, cmap='gray')
-plt.show()
-
-#Encontrar los contornos
-contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-#Dibujar los contornos
-cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
-monedas = []
-for cnt in contours:
-    area = cv2.contourArea(cnt)
-    perimetro = cv2.arcLength(cnt, True)
-
-    #print(area, perimetro)
-    if perimetro < 50 or area < 1000:
-        continue
-    factor = area / (perimetro ** 2)
-
-    if factor > 0.01:
-        monedas.append(factor)
-        print(1/factor)
-#Mostrar la imagen resultante
-print(len(monedas))
-plt.imshow(img)
-plt.show()
-
-############## Codigo con Canny 
+#Cargo la imagen y la convierto a escala de grises
 img = cv2.imread(img_moneda)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-plt.imshow(gray)
-plt.show()
-blurred = cv2.GaussianBlur(gray, (11, 11), 0)
+#Aplico un filtro para reducir el ruido
+#blurred = cv2.medianBlur(gray, 5)
+blurred = cv2.GaussianBlur(gray, (11,11), 0)
 
-plt.imshow(blurred)
-plt.show()
+#Detecto los bordes
+edges = cv2.Canny(blurred, 30, 70)
 
-edges = cv2.Canny(blurred, 30, 80)
+#Aplico operaciones morfológicas
 
-plt.imshow(edges)
-plt.show()
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))
+dilated = cv2.dilate(edges, kernel, iterations=1) # Dilatación para expandir las regiones detectadas
+thresh_morph = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel)  # Cierre para unir regiones cercanas
 
-#Encontrar los contornos
-contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+#Detecto contornos
+contours, _ = cv2.findContours(thresh_morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-#Dibujar los contornos
-cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
-monedas = []
-for cnt in contours:
-    area = cv2.contourArea(cnt)
-    perimetro = cv2.arcLength(cnt, True)
+#Creo una copia de la imagen original para rellenar los contornos
+filled_image = img.copy()
 
-    #print(area, perimetro)
-    if perimetro < 50:
+#Rellenar los contornos detectados
+for contour in contours:
+    cv2.drawContours(filled_image, [contour], -1, (0, 255, 0), thickness=cv2.FILLED)
+
+#Visualización
+plt.figure(figsize=(16, 8))
+
+#Imagen original
+plt.subplot(2, 2, 1)
+plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+plt.title("Imagen Original")
+plt.axis("off")
+
+#Detección de Bordes
+plt.subplot(2, 2, 2)
+plt.imshow(edges, cmap="gray")
+plt.title("Umbralización Inicial")
+plt.axis("off")
+
+#Morfología
+plt.subplot(2, 2, 3)
+plt.imshow(thresh_morph, cmap="gray")
+plt.title("Morfología")
+plt.axis("off")
+
+img_contornos = img.copy()
+peso = 0
+cent_50 = 0
+cent_10 = 0
+dados = []
+for contour in contours:
+    area = cv2.contourArea(contour)
+    perimeter = cv2.arcLength(contour, True)
+
+    # Ignorar áreas muy pequeñas
+    if area < 100 or perimeter < 200:
         continue
-    factor = area / (perimetro ** 2)
 
-    if factor > 0.01:
-        monedas.append(factor)
-        print(1/factor)
-#Mostrar la imagen resultante
-print(len(monedas))
-plt.imshow(img)
+    # Aproximar el contorno
+    approx = cv2.approxPolyDP(contour, 0.04 * perimeter, True)
+
+    # Calcular circularidad
+    circularity = (4 * np.pi * area) / (perimeter ** 2)
+
+    # Identificar formas
+    if len(approx) == 4:
+        # Probable cuadrado
+        x, y, w, h = cv2.boundingRect(contour)
+
+        # Recorta la región correspondiente al contorno
+        cropped_region = thresh_morph[y:y+h, x:x+w]
+
+        cv2.drawContours(img_contornos, [contour], -1, (0, 255, 255), thickness=cv2.FILLED)
+        kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (18,18))
+        cropped_region = cv2.morphologyEx(cropped_region, cv2.MORPH_CLOSE, kernel_close)
+        kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (60,60))
+        cropped_region = cv2.morphologyEx(cropped_region, cv2.MORPH_OPEN, kernel_open)
+        _, hierarchy = cv2.findContours(cropped_region, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        dados.append(len(hierarchy[0]))
+
+    elif circularity > 0.2:
+        # Probable círculo
+        if area < 80000:
+            cv2.drawContours(img_contornos, [contour], -1, (100, 100, 0), thickness=cv2.FILLED)
+            cent_10 += 1
+        elif area >= 80000 and area < 100000:
+            cv2.drawContours(img_contornos, [contour], -1, (50, 50, 0), thickness=cv2.FILLED)
+            peso += 1
+        else:
+            cv2.drawContours(img_contornos, [contour], -1, (10, 10, 0), thickness=cv2.FILLED)
+            cent_50 += 1
+    else:
+        # Otras formas
+        cv2.drawContours(img_contornos, [contour], -1, (0, 255, 0), thickness=cv2.FILLED)
+
+
+#Contornos rellenados
+plt.subplot(2, 2, 4)
+plt.imshow(cv2.cvtColor(img_contornos, cv2.COLOR_BGR2RGB))
+plt.title("Contornos Rellenados")
+plt.axis("off")
+
+plt.tight_layout()
 plt.show()
+
+print(f'En total se detectaron {peso + cent_10 + cent_50} monedas')
+print(f'De 1 peso: {peso}')
+print(f'De 50 centavos: {cent_50}')
+print(f'De 10 centavos: {cent_10}')
+print(f'Ademas se detectaron {len(dados)} dados')
+print(f'Los dados tienen en su cara superior los numeros {dados}')

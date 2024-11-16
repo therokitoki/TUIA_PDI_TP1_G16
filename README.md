@@ -40,3 +40,7 @@ cd *Ruta de la carpeta que contiene los archivos del repositorio*
 .\.venv\Scripts\activate
 python ej2.py
 ```
+
+
+
+
