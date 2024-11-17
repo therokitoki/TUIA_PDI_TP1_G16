@@ -1,11 +1,11 @@
 ############################################################################################
 #                                                                                          #
 #                              PROCESAMIENTO DE IMÁGENES 1                                 #
-#                                 TRABAJO PRÁCTICO N°1                                     #
+#                                 TRABAJO PRÁCTICO N°2                                     #
 #                                                                                          #
 #          GRUPO N°16: Gonzalo Asad, Sergio Castells, Agustín Alsop, Rocio Hachen          #
 #                                                                                          #
-#                       Problema 1 - Ecualización local de histograma                      #
+#                 Problema 1 - Detección y clasificación de monedas y dados                #
 #                                                                                          #
 ############################################################################################
 
@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img_moneda = 'C:\\Users\\alsop\\Documents\\GitHub\\TUIA_PDI_TP1_G16\\TP2\\monedas.jpg'
+img_moneda = '.\monedas.jpg'
 
 #Cargo la imagen y la convierto a escala de grises
 img = cv2.imread(img_moneda)
