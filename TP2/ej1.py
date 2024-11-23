@@ -13,6 +13,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from customlib import *
 
 # Path a la imagen a procesar
 img_moneda = '.\monedas.jpg'
@@ -21,37 +22,27 @@ img_moneda = '.\monedas.jpg'
 img = cv2.imread(img_moneda)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-#plt.imshow(gray, cmap='gray')
-#plt.title('Imagen en escala de grises')
-#plt.show()
+#pltimg(gray, "gray", "Imagen en escala de grises")
 
 # Se aplica un filtro Gaussiano, para reducir el ruido
 blurred = cv2.GaussianBlur(gray, (11,11), 0)
 
-#plt.imshow(gray, cmap='gray')
-#plt.title('Imagen con filtro Gaussiano')
-#plt.show()
+#pltimg(blurred, "gray", "Imagen con filtro Gaussiano")
 
 # Detección de bordes
-edges = cv2.Canny(blurred, 30, 70) 
+edges = cv2.Canny(blurred, 30, 70)
 
-#plt.imshow(edges, cmap='gray')
-#plt.title('Bordes detectados con Canny')
-#plt.show()
+#pltimg(edges, "gray", "Bordes detectados con Canny")
 
 # Operaciones morfológicas
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))
 dilated = cv2.dilate(edges, kernel, iterations=1) # Dilatación para expandir las regiones detectadas
 
-#plt.imshow(dilated, cmap='gray')
-#plt.title('Dilatación')
-#plt.show()
+#pltimg(dilated, "gray", "Dilatación")
 
 thresh_morph = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel)  # Cierre para unir regiones cercanas
 
-#plt.imshow(thresh_morph, cmap='gray')
-#plt.title('Clausura')
-#plt.show()
+#pltimg(thresh_morph, "gray", "Clausura")
 
 # Detección de contornos
 contours, _ = cv2.findContours(thresh_morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -63,11 +54,9 @@ filled_image = img.copy()
 for contour in contours:
     cv2.drawContours(filled_image, [contour], -1, (0, 255, 0), thickness=cv2.FILLED)
 
-#plt.imshow(filled_image, cmap='gray')
-#plt.title('Contornos rellenos')
-#plt.show()
+#pltimg(filled_image, "gray", "Contornos rellenos")
 
-#Visualización de los 
+#Visualización de los
 plt.figure(figsize=(16, 8))
 
 #Imagen original
@@ -184,9 +173,7 @@ for contour in contours:
     else: # Otras formas
         cv2.drawContours(img_contornos, [contour], -1, (0, 255, 0), thickness=cv2.FILLED)
 
-# plt.imshow(img_contornos, cmap='gray')
-# plt.title('Objetos clasificados')
-# plt.show()
+#pltimg(img_contornos, "gray", "Objetos clasificados")
 
 #Contornos rellenados
 plt.subplot(224, sharex = ax1, sharey = ax1)
@@ -206,6 +193,4 @@ print(f'De 10 centavos: {cent_10}')
 print(f'Además se detectaron {len(dados)} dados')
 print(f'Los dados tienen en su cara superior los números {dados}')
 
-plt.imshow(cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB))
-plt.title("Detección Automática de Objetos")
-plt.show()
+pltimg(cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB), None, "Detección Automática de Objetos")

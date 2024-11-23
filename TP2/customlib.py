@@ -3,11 +3,11 @@
 #                              PROCESAMIENTO DE IMÁGENES 1                                 #
 #                                 TRABAJO PRÁCTICO N°2                                     #
 #                                                                                          #
-#          GRUPO N°16: Gonzalo Asad, Sergio Castells, Agustín Alsop, Rocio Hachen          #                                                                                          
+#          GRUPO N°16: Gonzalo Asad, Sergio Castells, Agustín Alsop, Rocio Hachen          #
 #                                                                                          #
 #                                 Librería de Funciones                                    #
 #                                                                                          #
-############################################################################################ 
+############################################################################################
 
 import cv2
 import numpy as np
@@ -29,7 +29,10 @@ def pltimg(img: np.ndarray, cmap: str, title: str):
     Retorno:
 
     """
-    plt.imshow(img, cmap=f'{cmap}')
+    if cmap == None:
+        plt.imshow(img)
+    else:
+        plt.imshow(img, cmap=f'{cmap}')
     plt.title(title)
     plt.show()
 

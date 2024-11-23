@@ -9,11 +9,13 @@
 #                                                                                          #
 ############################################################################################
 
+# Se importan las librerías a utilizar
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from customlib import *
 
+# Se inicializa un contador para las imágenes que no se detectó correctamente la patente
 not_detected = 0
 
 # Se itera sobre las 13 imagenes contenidas en el directorio donde se encuentra el script
@@ -50,7 +52,7 @@ for i in range(1, 13):
     plt.axis('off')
     plt.show()
 
-
+# Reporte final
 detected = 12 - not_detected
 print('Procesamiento de imágenes completo\nReporte final:\n')
 print(f'Patentes detectadas: {detected}')
