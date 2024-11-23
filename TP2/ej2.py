@@ -132,21 +132,42 @@ def letterDetection(img: np.ndarray, th: int, max_area: float, min_area: float, 
         #print(th)
 
     print(f"Umbral final: {th}")
-    return cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB)
+    return cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB), img_valida
 
-for i in range(1,13):
+not_detected = 0
+
+for i in range(1, 13):
+    
     if i < 10:
-        img_auto = f'.\img0{i}.png'
+        img_auto = f'./img0{i}.png'
     else:
-        img_auto = f'.\img{i}.png'
+        img_auto = f'./img{i}.png'
 
+    
     img = cv2.imread(img_auto)
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    plt.title('Imagen inicial')
-    plt.show()
+    
 
-    img_final = letterDetection(img, 1, 170.0, 30.0, 3.0, 1.5)
-    # umbral img 02: 110
-    plt.imshow(img_final)
-    plt.title('Imagen final')
-    plt.show()
+    plt.figure(figsize=(8, 4))
+    plt.subplot(1, 2, 1)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.title('Imagen original')
+    plt.axis('off')
+    
+    img_final, status = letterDetection(img, 1, 170.0, 30.0, 3.0, 1.5)
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(img_final, cmap='gray')
+
+    if status:
+        plt.title('Imagen procesada')
+    else:
+        plt.title('No se pudo detectar la patente')
+        not_detected += 1
+
+    plt.axis('off')
+    plt.show() 
+
+detected = 12 - not_detected
+print('Procesamiento de imágenes completo\nReporte final:\n')
+print(f'Patentes detectadas: {detected}')
+print(f'Porcentaje de éxito: {detected/12 * 100}%')
