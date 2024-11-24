@@ -74,10 +74,11 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
         min_area: Mínima area de la letra a detectar (entero, positivo)
         max_aspect_ratio: Máximo ratio de aspecto (entero, positivo)
         min_aspect_ratio: Mínimo ratio de aspecto (entero, positivo)
-        jump: incremento en el valor del umbral tras cada iteración
+        jump: Incremento en el valor del umbral tras cada iteración
 
     Retorno:
         np.ndarray: Imagen resultante luego de detectar y remarcar la patente en el caso de haber sido detectado y sus respectivos caracteres que las componen.
+        status: Un valor True indica que el procesamiento ha sido realizado exitosamente.
     """
     # Se convierte en escala de grises la imagen
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -85,10 +86,10 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
     #pltimg(gray, "gray", "Imagen escala de grises")
 
     # Se define un estado de la imagen
-    img_valida = False
+    status = False
 
     # Se genera un loop que se detendrá cuando se detecte correctamente la patente o cuando alcanza el máximo de los hiperparametros
-    while not img_valida and th_min <= 250:
+    while not status and th_min <= 250:
 
         # Se realiza una copia de la imagen
         img_final = img.copy()
@@ -229,8 +230,8 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
 
         # # #pltimg(filtered_letters, "gray", "Filtrado por relación de aspecto")
 
-        img_valida = True
+        status = True
         #print(th)
 
     print(f"Umbral final: {th_min}")
-    return cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB), img_valida
+    return cv2.cvtColor(img_final, cv2.COLOR_BGR2RGB), status
