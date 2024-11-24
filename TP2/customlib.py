@@ -37,7 +37,7 @@ def pltimg(img: np.ndarray, cmap: str, title: str):
     plt.show()
 
 
-def slice_when(predicate, iterable):
+def sliceWhen(predicate, iterable):
   """
     Divide un iterable en sublistas basándose en una condición especificada por el predicado.
 
@@ -65,11 +65,11 @@ def slice_when(predicate, iterable):
 
 def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float, max_aspect_ratio: float, min_aspect_ratio: float, jump: int = 1) -> np.ndarray:
     """
-    Detecta en una imagen dada la patente y los caracteres que la compone.
+    Detecta la patente y los caracteres que la componen contenidos en una imagen dada.
 
     Parámetros:
         img: Imagen a procesar (en escala de grises)
-        th_min: Valor de threshold donde empezará a iterar (entero, positivo)
+        th_min: Valor de threshold inicial para aplicar umbralado (entero, positivo)
         max_area: Máxima area de la letra a detectar (entero, positivo)
         min_area: Mínima area de la letra a detectar (entero, positivo)
         max_aspect_ratio: Máximo ratio de aspecto (entero, positivo)
@@ -147,7 +147,7 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
         coord_y = sorted(coord_y, key=lambda x: x[0])
         
         # Se agrupan las coordenadas x según su distancia
-        slices_x = list(slice_when(lambda x1,x2: x2 - x1 > 30, coord_x))
+        slices_x = list(sliceWhen(lambda x1,x2: x2 - x1 > 30, coord_x))
         
         candidates = []
         found = False

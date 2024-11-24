@@ -18,7 +18,7 @@ from customlib import *
 # Se inicializa una lista donde se almacenarán las imagenes procesadas
 imgs_proc = []
 
-# Se inicializa un contador para las imágenes que no se detectó correctamente la patente
+# Se inicializa un contador para las imágenes en las que no se detectó correctamente la patente
 not_detected = 0
 
 # Se itera sobre las 13 imagenes contenidas en el directorio donde se encuentra el script
