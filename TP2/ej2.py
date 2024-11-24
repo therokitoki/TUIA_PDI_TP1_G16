@@ -45,7 +45,6 @@ for i in range(1, 13):
 
     plt.subplot(1, 2, 2, sharex=ax,sharey=ax)
     plt.imshow(img_final, cmap='gray')
-
     # Dependiendo de si la detección fue exitosa o no se imprime su respectivo título
     if status:
         plt.title(f'Imagen {i} procesada')
