@@ -25,7 +25,7 @@ for i in range(1, 13):
         img_auto = f'./img0{i}.png'
     else:
         img_auto = f'./img{i}.png'
-
+    
     # Se carga la imagen
     img = cv2.imread(img_auto)
 
@@ -37,7 +37,7 @@ for i in range(1, 13):
     plt.axis('off')
 
     # Se inicializa la funcion donde detectara la patente de la imagen actual
-    img_final, status = matDetection(img, 1, 170.0, 30.0, 3.0, 1.5)
+    img_final, status = matDetection(img, 50, 170.0, 20.0, 3.0, 1.5, 7)
 
     plt.subplot(1, 2, 2)
     plt.imshow(img_final, cmap='gray')

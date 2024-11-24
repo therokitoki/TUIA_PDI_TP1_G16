@@ -36,7 +36,22 @@ def pltimg(img: np.ndarray, cmap: str, title: str):
     plt.title(title)
     plt.show()
 
-def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float, max_aspect_ratio: float, min_aspect_ratio: float) -> np.ndarray:
+def slice_when(predicate, iterable):
+  i, x, size = 0, 0, len(iterable)
+  while i < size-1:
+    if predicate(iterable[i][0], iterable[i+1][0]):
+      yield iterable[x:i+1]
+      x = i + 1
+    i += 1
+  yield iterable[x:size]
+
+# tst = [1,3,4,6,8,22,24,25,26,67,68,70,72]
+# slices = slice_when(lambda x,y: y - x > 2, tst)
+# print(list(slices))
+# #=> [[1, 3, 4, 6, 8], [22, 24, 25, 26], [67, 68, 70, 72]]
+
+
+def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float, max_aspect_ratio: float, min_aspect_ratio: float, jump: float) -> np.ndarray:
     """
     Detecta en una imagen dada la patente y los caracteres que la compone.
 
@@ -65,18 +80,17 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
         # Se realiza una copia de la imagen
         img_final = img.copy()
 
+        #th_min = 143
         # Para la detección de la patente se sigue los siguientes 3 pasos
         # 1- Umbralado
         _, thresh_img = cv2.threshold(gray, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
 
         #pltimg(thresh_img, "gray", "Umbralado")
 
-
         # 2- Componentes conectadas
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, 8, cv2.CV_32S)
 
         #pltimg(labels, "gray", "Componentes conectadas")
-
 
         # 3- Filtrado por área
         filtered_labels = labels.copy()
@@ -96,69 +110,111 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
                 # 4- Filtrado por relación de aspecto
                 ar = h / w
                 if ar >= min_aspect_ratio and ar <= max_aspect_ratio:
+
+                    # Guardo las etiquetas
                     letters_index.append(i)
 
-                    # 5- Label
-                    cv2.rectangle(img_final, (x, y), (x+w, y+h), (0, 0, 255), 1)
-
-        if len(letters_index) != 6:
-            #print(len(letters_index),th)
-            th_min += 1
+        # Si la cantidad de componentes identificadas es menor de 5, se descarta el umbral
+        if len(letters_index) < 6:
+            th_min += jump
             continue
-
+        
+        # Inicializo las listas donde guardaremos las coordenadas de las componentes identificadas
         coord_x = []
         coord_y = []
-        alturas = []
 
         for i in letters_index:
             x, y, w, h, a = stats[i]
+            coord_x.append((int(x),i))
+            coord_y.append((int(y),i))
+
+        # Se ordena la lista de tuplas con formato (coordenada, label) según el valor de la coordenada.
+        coord_x = sorted(coord_x, key=lambda x: x[0])
+        coord_y = sorted(coord_y, key=lambda x: x[0])
+        
+        # Se agrupan las coordenadas x según su distancia
+        slices_x = list(slice_when(lambda x,y: y - x > 30, coord_x))
+        
+        candidates = []
+        found = False
+
+        # Se identifican aquellas agrupaciones que contienen 6 elementos
+        if slices_x != []:
+            for slice in slices_x:
+                if len(slice) == 6:
+                    candidates.append(slice)
+                    found = True
+        
+        if not found:
+            th_min +=jump
+            continue
+        
+
+        found = False
+
+        for candidate in candidates:
+
+            coord_y_filtered = []
+            candidate_labels  = []
+
+            # Se guardan los labels en una lista aparte
+            for tuple in candidate:    
+                candidate_labels.append(tuple[1])
+
+            # Se filtran las coordenadas Y obtenidas según los labels de candidate_labels
+            for tuple in coord_y:
+                if tuple[1] in candidate_labels:
+                    coord_y_filtered.append(tuple)
+
+            # Validación de distancia en el eje Y
+            y_ant = coord_y_filtered[0][0]
+
+            maximo_y = 0
+
+            for y in coord_y_filtered:
+                dist = y[0]-y_ant
+                if maximo_y < dist:
+                    maximo_y = dist
+                y_ant = y[0]
+
+            if maximo_y < 5:
+                found = True
+                break        
+
+        if not found:
+            th_min += jump
+            continue
+
+        # Se grafican los rectángulos contenedores
+        coord_x = []
+        coord_y = []
+        alturas = []
+        
+        for i in candidate_labels:
+            x, y, w, h, a = stats[i]
+            cv2.rectangle(img_final, (x, y), (x+w, y+h), (0, 0, 255), 1)
             coord_x.append(int(x))
             coord_y.append(int(y))
             alturas.append(int(h))
 
         coord_x.sort(),coord_y.sort(),alturas.sort()
+        cv2.rectangle(img_final, (coord_x[0]-round((w*0.9)), coord_y[0]-round((alturas[5]//2)*1.5)), (coord_x[5]+round((coord_x[5]-coord_x[4])*1.5), coord_y[0]+round((alturas[5]*2))), (0, 255, 0), 1)
 
-        x_ant = coord_x[0]
-        y_ant = coord_y[0]
-        maximo_x = 0
-        maximo_y = 0
+        # # Imprimir labels filtrados
+        # mask_filtered_labels = np.isin(filtered_labels, filtered_index)
 
-        for x in coord_x:
-            dist = x-x_ant
-            if maximo_x < dist:
-                maximo_x = dist
-            x_ant = x
+        # filtered_labels[mask_filtered_labels] = 255
+        # filtered_labels[~mask_filtered_labels] = 0
 
-        for y in coord_y:
-            dist = y-y_ant
-            if maximo_y < dist:
-                maximo_y = dist
-            y_ant = y
+        # #pltimg(filtered_labels, "gray", "Filtrado por área")
 
-        #print(maximo_x, 'maximo x')
-        #print(maximo_y, 'maximo y')
+        # # Imprimir letras filtradas
+        # mask_filtered_letters = np.isin(filtered_letters, letters_index)
 
-        if maximo_y > 5 or maximo_x > 25:
-            th_min += 1
-            continue
+        # filtered_letters[mask_filtered_letters] = 255
+        # filtered_letters[~mask_filtered_letters] = 0
 
-        cv2.rectangle(img_final, (coord_x[0]-5, coord_y[0]-round((alturas[5]//2)*1.5)), (coord_x[5]+round((coord_x[5]-coord_x[4])*1.5), coord_y[0]+(alturas[5]*2)), (0, 255, 0), 1)
-
-        # Imprimir labels filtrados
-        mask_filtered_labels = np.isin(filtered_labels, filtered_index)
-
-        filtered_labels[mask_filtered_labels] = 255
-        filtered_labels[~mask_filtered_labels] = 0
-
-        #pltimg(filtered_labels, "gray", "Filtrado por área")
-
-        # Imprimir letras filtradas
-        mask_filtered_letters = np.isin(filtered_letters, letters_index)
-
-        filtered_letters[mask_filtered_letters] = 255
-        filtered_letters[~mask_filtered_letters] = 0
-
-        #pltimg(filtered_letters, "gray", "Filtrado por relación de aspecto")
+        # # #pltimg(filtered_letters, "gray", "Filtrado por relación de aspecto")
 
         img_valida = True
         #print(th)
