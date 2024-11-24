@@ -24,7 +24,7 @@ def pltimg(img: np.ndarray, cmap: str, title: str):
     Parámetros:
         img: Imagen a mostrar
         cmap: Mapeo de la imagen a mostrar
-        title: Título de la imgagen a mostrar
+        title: Título de la imagen a mostrar
 
     Retorno:
 
@@ -36,10 +36,22 @@ def pltimg(img: np.ndarray, cmap: str, title: str):
     plt.title(title)
     plt.show()
 
+
 def slice_when(predicate, iterable):
+  """
+    Divide un iterable en sublistas basándose en una condición especificada por el predicado.
+
+    Parámetros:
+        predicate: Una función que toma dos argumentos (elementos consecutivos del iterable)
+                   y devuelve True si se debe realizar una división en ese punto.
+        iterable: Un iterable que se dividirá en sublistas.
+
+    Retorno:
+        list: Sublistas del iterable original, divididas según la condición del predicado.
+    """
   i, x, size = 0, 0, len(iterable)
   while i < size-1:
-    if predicate(iterable[i][0], iterable[i+1][0]):
+    if predicate(iterable[i][0], iterable[i+1][0]): 
       yield iterable[x:i+1]
       x = i + 1
     i += 1
@@ -51,7 +63,7 @@ def slice_when(predicate, iterable):
 # #=> [[1, 3, 4, 6, 8], [22, 24, 25, 26], [67, 68, 70, 72]]
 
 
-def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float, max_aspect_ratio: float, min_aspect_ratio: float, jump: float) -> np.ndarray:
+def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float, max_aspect_ratio: float, min_aspect_ratio: float, jump: int = 1) -> np.ndarray:
     """
     Detecta en una imagen dada la patente y los caracteres que la compone.
 
@@ -62,6 +74,7 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
         min_area: Mínima area de la letra a detectar (entero, positivo)
         max_aspect_ratio: Máximo ratio de aspecto (entero, positivo)
         min_aspect_ratio: Mínimo ratio de aspecto (entero, positivo)
+        jump: incremento en el valor del umbral tras cada iteración
 
     Retorno:
         np.ndarray: Imagen resultante luego de detectar y remarcar la patente en el caso de haber sido detectado y sus respectivos caracteres que las componen.
@@ -81,7 +94,7 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
         img_final = img.copy()
 
         #th_min = 143
-        # Para la detección de la patente se sigue los siguientes 3 pasos
+        # Para la detección de la patente se sigue los siguientes pasos
         # 1- Umbralado
         _, thresh_img = cv2.threshold(gray, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
 
@@ -111,10 +124,10 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
                 ar = h / w
                 if ar >= min_aspect_ratio and ar <= max_aspect_ratio:
 
-                    # Guardo las etiquetas
+                    # Almacenado de etiquetas
                     letters_index.append(i)
 
-        # Si la cantidad de componentes identificadas es menor de 5, se descarta el umbral
+        # Si la cantidad de componentes identificadas es menor de 6, se descarta el umbral
         if len(letters_index) < 6:
             th_min += jump
             continue
@@ -123,17 +136,17 @@ def matDetection(img: np.ndarray, th_min: int, max_area: float, min_area: float,
         coord_x = []
         coord_y = []
 
-        for i in letters_index:
-            x, y, w, h, a = stats[i]
-            coord_x.append((int(x),i))
-            coord_y.append((int(y),i))
+        for index in letters_index:
+            x, y, w, h, a = stats[index]
+            coord_x.append((int(x),index))
+            coord_y.append((int(y),index))
 
         # Se ordena la lista de tuplas con formato (coordenada, label) según el valor de la coordenada.
         coord_x = sorted(coord_x, key=lambda x: x[0])
         coord_y = sorted(coord_y, key=lambda x: x[0])
         
         # Se agrupan las coordenadas x según su distancia
-        slices_x = list(slice_when(lambda x,y: y - x > 30, coord_x))
+        slices_x = list(slice_when(lambda x1,x2: x2 - x1 > 30, coord_x))
         
         candidates = []
         found = False
