@@ -25,9 +25,6 @@ def pltimg(img: np.ndarray, cmap: str, title: str):
         img: Imagen a mostrar
         cmap: Mapeo de la imagen a mostrar
         title: Título de la imagen a mostrar
-
-    Retorno:
-
     """
     if cmap == None:
         plt.imshow(img)
