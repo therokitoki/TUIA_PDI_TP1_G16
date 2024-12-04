@@ -25,7 +25,7 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # Obtiene el ancho del video en 
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # Obtiene la altura del video en píxeles usando la propiedad CAP_PROP_FRAME_HEIGHT.
 fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) del video usando CAP_PROP_FPS.
 # n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
-print(fps)
+#print(fps)
 frame_number = 0
 while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
@@ -58,7 +58,7 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
             y_fin = round(y+(h*0.95))
 
             #cv2.rectangle(frame, (x_ini, y_ini), (x_fin, y_fin), (0, 255, 0), 3)
-            #cv2.imwrite(os.path.join("./frames", f"frame_{frame_number}.jpg"), frame) # Guarda el frame en el archivo './frames/frame_{frame_number}.jpg'.
+            cv2.imwrite(os.path.join("./frames", f"frame_{frame_number}.jpg"), thresh_img) # Guarda el frame en el archivo './frames/frame_{frame_number}.jpg'.
         #video 1 == 65 perfeee
         #video 2 == 65 perfeee
         #video 3 == 65 perfeee
@@ -68,7 +68,7 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
     ###################################################################################################################################################
     ###################################################################################################################################################    
 
-        if (frame_number) == 65:
+        if (frame_number) > 30:
             frame_crop = frame[y_ini:y_fin, x_ini:x_fin]
 
             frame_crop_bgr = cv2.cvtColor(frame_crop, cv2.COLOR_BGR2LAB)
@@ -78,7 +78,7 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
             #_, thresh_img = cv2.threshold(A, thresh=110, maxval=255, type=cv2.THRESH_BINARY)
 
             #num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, 8, cv2.CV_32S)
-            th_min = 1
+            th_min = 95
             status = False
             max_area = 900
             min_area = 100
@@ -88,12 +88,13 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
     # DETECTA DADOS
     ###################################################################################################################################################        
 
-            while not status and th_min <= 255:
+            while not status and th_min <= 120:
                 _, thresh_img_a = cv2.threshold(A, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
 
                 num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_a, 8, cv2.CV_32S)
 
                 counter_area = []
+                cen_test = []
 
                 if num_labels != 6:
                     th_min += jump
@@ -104,6 +105,7 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
                     if a < max_area and a > min_area:
                         counter_area.append(i)
+                        cen_test.append(centroids)
 
                 # Si la cantidad de componentes identificadas es menor de 6, se descarta el umbral
                 if len(counter_area) != 5:
@@ -121,23 +123,24 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
     ###################################################################################################################################################
     # DETECTA NUMEROS
     ###################################################################################################################################################            
-    
+
             for stat in stats:
                 x,y,w,h,a = stat
-                if a < ((x_fin-x_ini)*(y_fin-y_ini)*0.95):
-                    cv2.rectangle(frame_crop, (x, y), (x+w, y+h), (255, 0, 0), 1)
+                if a < max_area and a > min_area:
+                    if a < ((x_fin-x_ini)*(y_fin-y_ini)*0.95):
+                        cv2.rectangle(frame_crop, (x, y), (x+w, y+h), (255, 0, 0), 1)
 
-                    frame_l_crop = L[y:y+h, x:x+w]
+                        frame_l_crop = L[y:y+h, x:x+w]
 
-                    _, thresh_img_l = cv2.threshold(frame_l_crop, thresh=195, maxval=255, type=cv2.THRESH_BINARY)
+                        _, thresh_img_l = cv2.threshold(frame_l_crop, thresh=195, maxval=255, type=cv2.THRESH_BINARY)
 
-                    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_l, 8, cv2.CV_32S)
+                        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_l, 8, cv2.CV_32S)
 
-                    font = cv2.FONT_HERSHEY_SIMPLEX
+                        font = cv2.FONT_HERSHEY_SIMPLEX
 
-                    cv2.putText(frame_crop, f'N {num_labels-1}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+                        cv2.putText(frame_crop, f'N {num_labels-1}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
-                    cv2.imwrite(os.path.join("./frames", f"frame_finaaaaaaaaaaaaaaaaaal.jpg"), frame_crop)
+                        cv2.imwrite(os.path.join("./frames", f"frame_finaaaaaaaaaaaaaaaaaal.jpg"), frame_crop)
 
                     #print(num_labels)
 
