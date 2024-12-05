@@ -27,6 +27,7 @@ fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) de
 # n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
 #print(fps)
 frame_number = 0
+centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0)]
 while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
     ret, frame = cap.read() # 'ret' indica si la lectura fue exitosa (True/False) y 'frame' contiene el contenido del frame si la lectura fue exitosa.
@@ -40,24 +41,20 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
             x_ini, x_fin, y_ini, y_fin = roiDetect(img=frame, percent=5, thresh=110, save=True)
 
 
-
-
-        th_min = 95
-        max_area = 900
-        min_area = 100
-
-        if (frame_number) > 0:
+        if (frame_number) > 0: # Ver de Eliminar esto
             frame_crop = frame[y_ini:y_fin, x_ini:x_fin]
 
             frame_crop_bgr = cv2.cvtColor(frame_crop, cv2.COLOR_BGR2LAB)
 
             L, A, B = cv2.split(frame_crop_bgr)
 
-            _, thresh_img_a = cv2.threshold(A, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
-
-            num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_a, 8, cv2.CV_32S)
-
-
+            flag, centroids, stats = centroidsDetect(img=A, th_min=95, min_area=100, max_area=900, jump=1)
+  
+            # Comparación de Centroides
+            if flag:   # Se detectaron los 5 dados
+                pass
+             
+                 
             ######
 
             for stat in stats:

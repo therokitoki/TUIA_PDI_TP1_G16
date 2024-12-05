@@ -81,7 +81,7 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
 # ******************************************************************************************
 
 
-def centroidDetect(img: np.ndarray, th_min: int=1, min_area: int=50, max_area: int=100, jump: int=1):
+def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: int=1, jump: int=1) -> tuple[bool, list, list]:
 
     
     # Validación del parámetro 'max_area'
@@ -99,14 +99,14 @@ def centroidDetect(img: np.ndarray, th_min: int=1, min_area: int=50, max_area: i
 
             
     
-    status = False
+    flag = False
     
-    while not status and th_min <= 120:
+    while not flag and th_min <= 120:
         _, thresh_img_a = cv2.threshold(img, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
 
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_a, 8, cv2.CV_32S)
 
-        centroids_list = []
+        centroid_list = []
 
         if num_labels != 6:
             th_min += jump
@@ -116,13 +116,23 @@ def centroidDetect(img: np.ndarray, th_min: int=1, min_area: int=50, max_area: i
             x, y, w, h, a = stats[i]
 
             if a < max_area and a > min_area:
-                centroids_list.append(centroids)
+                centroid_list.append(centroids)
 
         # Si la cantidad de componentes identificadas es menor de 6, se descarta el umbral
-        if len(centroids_list) != 5:
+        if len(centroid_list) != 5:
             th_min += jump
             continue
         
-        print(th_min)
-        print(stats)
-        status = True
+        #print(th_min)
+        #print(stats)
+        flag = True
+
+    return flag, centroid_list, stats
+
+# ******************************************************************************************
+# ******************************************************************************************
+
+def motionDetector(ant: list, act: list, thresh: int=5) -> bool:
+# Acá hay que comparar los centroides anteriores y actuales y en caso de detectar 
+# un desplazamiento inferior al umbral se considera que no existe movimiento.
+    pass
