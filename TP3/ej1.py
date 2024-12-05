@@ -20,7 +20,7 @@ import os
 os.makedirs("./frames", exist_ok = True)  # Si no existe, crea la carpeta 'frames' en el directorio actual.
 
 # --- Leer un video --------------------------------------------
-cap = cv2.VideoCapture('./videos/tirada_4.mp4')  # Abre el archivo de video especificado ('tirada_1.mp4') para su lectura.
+cap = cv2.VideoCapture('./videos/tirada_2.mp4')  # Abre el archivo de video especificado ('tirada_1.mp4') para su lectura.
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # Obtiene el ancho del video en píxeles usando la propiedad CAP_PROP_FRAME_WIDTH.
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # Obtiene la altura del video en píxeles usando la propiedad CAP_PROP_FRAME_HEIGHT.
 fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) del video usando CAP_PROP_FPS.
@@ -34,7 +34,7 @@ while (cap.isOpened()): # Verifica si el video se abrió correctamente.
     if ret == True:
 
         frame = cv2.resize(frame, dsize=(int(width/3), int(height/3))) # Redimensiona el frame capturado.
-
+        
     ###################################################################################################################################################
     # DETECTA PAÑO
     ###################################################################################################################################################    
