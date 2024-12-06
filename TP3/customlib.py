@@ -101,12 +101,13 @@ def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: i
     
     flag = False
     
-    while not flag and th_min <= 120:
+    while not flag and th_min <= 160:
         _, thresh_img_a = cv2.threshold(img, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
 
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_a, 8, cv2.CV_32S)
 
         centroid_list = []
+        count = 0
 
         if num_labels != 6:
             th_min += jump
@@ -116,23 +117,44 @@ def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: i
             x, y, w, h, a = stats[i]
 
             if a < max_area and a > min_area:
-                centroid_list.append(centroids)
+                count += 1
+                #centroid_list.append(centroids)
 
         # Si la cantidad de componentes identificadas es menor de 6, se descarta el umbral
-        if len(centroid_list) != 5:
+        if count != 5:
             th_min += jump
             continue
         
         #print(th_min)
         #print(stats)
         flag = True
-
+        centroid_list = centroids.tolist()
+    
     return flag, centroid_list, stats
 
 # ******************************************************************************************
 # ******************************************************************************************
 
-def motionDetector(ant: list, act: list, thresh: int=5) -> bool:
+def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
 # Acá hay que comparar los centroides anteriores y actuales y en caso de detectar 
 # un desplazamiento inferior al umbral se considera que no existe movimiento.
-    pass
+    
+    # Ordeno las listas
+    ant.sort()
+    act.sort()
+
+    motion = True
+    cont = 0    
+    for i in range(len(ant)):
+        # Desempaqueto los centroides
+        x1, y1 = ant[i]
+        x2, y2 = act[i]
+
+        if (x2 - x1) < thresh and (y2 - y1) < thresh:
+            cont += 1
+    
+    # Verifico
+    if cont == len(ant):   # No se detecta movimiento
+        motion = False
+    
+    return motion
