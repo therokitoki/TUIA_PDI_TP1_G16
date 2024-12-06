@@ -29,7 +29,7 @@ for video in range(1, 5):
     #print(fps)
     out = cv2.VideoWriter(f'./videos/tirada_{video}_Output.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
     frame_number = 0
-    centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0)]
+    centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
     while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
         ret, frame = cap.read() # 'ret' indica si la lectura fue exitosa (True/False) y 'frame' contiene el contenido del frame si la lectura fue exitosa.
@@ -55,7 +55,7 @@ for video in range(1, 5):
                 # Comparación de Centroides
                 motion = True
                 if flag:   # Se detectaron los 5 dados
-                    motion = motionDetector(centroids_ant, centroids, thresh=0.5)
+                    motion = motionDetector(centroids_ant, centroids, thresh=5)
                 
                 centroids_ant = centroids
                 
@@ -83,7 +83,7 @@ for video in range(1, 5):
                                 cv2.putText(frame_crop, f'N {num_labels-1}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
                             
-            frame = cv2.resize(frame, (width, height))
+            #frame = cv2.resize(frame, (width, height))
             out.write(frame)
             cv2.imshow('Frame', frame) # Muestra el frame redimensionado.
 

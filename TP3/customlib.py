@@ -42,6 +42,10 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
     # Validación del parámetro 'thresh'
     if not isinstance(thresh, int) or not (1 <= thresh <= 255):
         raise ValueError("El parámetro 'thresh' debe ser un número entero entre 1 y 255.")
+    
+    # Validación del parámetro 'save'
+    if not isinstance(save, bool):
+        raise ValueError("El parámetro 'save' debe ser un valor booleano (True o False).")
 
     # frame_test = frame.copy()
 
@@ -56,7 +60,6 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
     # Detección de componentes conectadas.
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, 8, cv2.CV_32S)
 
-    print(stats)
     # Calcula de los vértices de la región detectada, considerando el márgen de ajuste.
     x,y,w,h,a = stats[1]
 
@@ -82,7 +85,30 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
 
 
 def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: int=1, jump: int=1) -> tuple[bool, list, list]:
+    """
+    Devuelve los centroides y estadísticas de determinadas componentes conectadas detectadas en una imágen. 
+    
+    Parámetros:
+        img: Imágen de entrada.
+        th_min: Valor de umbral inicial para obtener una máscara binaria.
+        min_area: Área mínima que debe tener una componente conectada para ser considerada válida.
+        max_area: Área máxima que puede tener una componente conectada para ser considerada válida. Debe ser menor o igual al área total de la imagen.
+        jump: Incremento en el umbral 'th_min' en cada iteración si las condiciones no se cumplen.
 
+    Retorno:
+        flag: Indica si se encontraron exactamente 6 componentes válidas bajo las restricciones definidas.
+        centroid_list: Lista con las coordenadas de los centroides de las componentes detectadas. 
+        stats: Estadísticas de las componentes conectadas detectadas. Cada componente incluye:
+            - Coordenada x superior izquierda.
+            - Coordenada y superior izquierda.
+            - Ancho.
+            - Alto.
+            - Área.
+    """
+    
+    # Validación del parámetro 'th_min'
+    if not isinstance(th_min, int) or not (1 <= th_min <= 255):
+        raise ValueError("El parámetro 'th_min' debe ser un número entero entre 1 y 255.")
     
     # Validación del parámetro 'max_area'
     img_area = img.shape[0] * img.shape[1] # Area de la imágen
@@ -93,34 +119,35 @@ def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: i
     if not isinstance(min_area, int) or not (1 <= min_area < max_area):
         raise ValueError("El parámetro 'mix_area' debe ser un número entero menor a 'max_area'.")
     
-    # Validación del parámetro 'th_min'
-    if not isinstance(th_min, int) or not (1 <= th_min <= 255):
-        raise ValueError("El parámetro 'th_min' debe ser un número entero entre 1 y 255.")
-
-            
-    
+    # Validación del parámetro 'jump'
+    if not isinstance(jump, int) or not (1 <= jump <= 255):
+        raise ValueError("El parámetro 'jump' debe ser un número entero entre 1 y 255.")
+       
     flag = False
     
     while not flag and th_min <= 160:
+        # Umbralado de la imagen de entrada
         _, thresh_img_a = cv2.threshold(img, thresh=th_min, maxval=255, type=cv2.THRESH_BINARY)
 
+        # Detección de componentes conectadas.
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_a, 8, cv2.CV_32S)
 
         centroid_list = []
         count = 0
 
+        # Verificación cantidad de labels identificadas
         if num_labels != 6:
             th_min += jump
             continue
 
         for i in range(len(stats)):
             x, y, w, h, a = stats[i]
-
+            # Filtrado de labels por área
             if a < max_area and a > min_area:
                 count += 1
-                #centroid_list.append(centroids)
+                
 
-        # Si la cantidad de componentes identificadas es menor de 6, se descarta el umbral
+        # Si la cantidad de labels filtradas es distinta de 5, se descarta el umbral
         if count != 5:
             th_min += jump
             continue
@@ -136,25 +163,58 @@ def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: i
 # ******************************************************************************************
 
 def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
-# Acá hay que comparar los centroides anteriores y actuales y en caso de detectar 
-# un desplazamiento inferior al umbral se considera que no existe movimiento.
+    """
+    Detecta si hay movimiento basado en el desplazamiento de los centroides.
+
+    Esta función compara las posiciones de los centroides de dos listas consecutivas
+    (anteriores y actuales) y determina si existe movimiento. Se considera que no hay 
+    movimiento si el desplazamiento entre los centroides correspondientes de ambas listas 
+    es menor a un umbral definido.
+
+    Parámetros:
+        ant: Lista de coordenadas (x, y) de los centroides en el estado anterior.
+        act: Lista de coordenadas (x, y) de los centroides en el estado actual.
+        thresh: Umbral de desplazamiento. Si el desplazamiento es menor
+                que este valor, no se considera movimiento. Por defecto es 5.
+
+    Retorno:
+        motion: 'True' si se detecta movimiento, 'False' en caso contrario.
+    """
+    # Validación del parámetro 'ant'
+    # if not ant:
+    #     raise ValueError("'ant' no puede ser una lista vacía.")
     
-    # Ordeno las listas
+    # Validación del parámetro 'act' 
+    if not act:
+        raise ValueError("'act' no puede ser una lista vacía.")
+
+    # Validación de que 'thresh' sea un número positivo
+    if not isinstance(thresh, (int, float)) or thresh <= 0:
+        raise ValueError("El parámetro 'thresh' debe ser un número positivo.")
+  
+    # Ordenamiento de las listas de centroides para garantizar correspondencia entre elementos.
     ant.sort()
     act.sort()
 
+    # Se asume que hay movimiento inicialmente.
     motion = True
     cont = 0    
-    for i in range(len(ant)):
-        # Desempaqueto los centroides
+  
+    # Comparación de centroides correspondientes.
+    for i in range(min(len(ant), len(act))):
+        # Desempaqueto las coordenadas de los centroides.
         x1, y1 = ant[i]
         x2, y2 = act[i]
 
+        # Verifico si el desplazamiento está por debajo del umbral en ambas coordenadas.
         if (x2 - x1) < thresh and (y2 - y1) < thresh:
             cont += 1
     
-    # Verifico
-    if cont == len(ant):   # No se detecta movimiento
+    # Si todos los centroides tienen desplazamientos inferiores al umbral, no hay movimiento.
+    if cont == len(ant):  
         motion = False
     
     return motion
+
+# ******************************************************************************************
+# ******************************************************************************************
