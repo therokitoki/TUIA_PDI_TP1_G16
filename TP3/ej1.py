@@ -55,13 +55,14 @@ for video in range(1, 5):
                 # Comparación de Centroides
                 motion = True
                 if flag:   # Se detectaron los 5 dados
-                    motion = motionDetector(centroids_ant, centroids, thresh=5)
+                    motion = motionDetector(centroids_ant, centroids, thresh=1)
                 
-                centroids_ant = centroids
+                    centroids_ant = centroids
                 
                 ######
                 max_area = 900
                 min_area = 100
+                dice_values = []
                 for stat in stats:
                     x,y,w,h,a = stat
                     if a < max_area and a > min_area:
@@ -78,11 +79,31 @@ for video in range(1, 5):
 
                             num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_l, 8, cv2.CV_32S)
 
+                            for stat in stats:
+                                dice_values.append(num_labels - 1)
+
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             if not motion:
                                 cv2.putText(frame_crop, f'N {num_labels-1}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+                                
+                if not motion:
+                    result = gameAnalyzer(dice_values)
 
-                            
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = 2
+                    thickness = 2
+
+                    # Calcular el tamaño del texto
+                    (text_width, text_height), baseline = cv2.getTextSize(f'{result}', font, font_scale, thickness)
+
+                    # Calcular el punto de inicio para centrar el texto
+                    x = (frame.shape[1] - text_width) // 2  # Centro horizontal
+                    y = (frame.shape[0] + text_height) // 2  # Centro vertical (considerando que y coordina la línea base)
+
+                    # Escribir el texto en el centro
+                    cv2.putText(frame, f'{result}', (x, y), font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
+                  
+
             #frame = cv2.resize(frame, (width, height))
             out.write(frame)
             cv2.imshow('Frame', frame) # Muestra el frame redimensionado.

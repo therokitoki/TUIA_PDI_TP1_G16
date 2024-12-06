@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from collections import Counter
 
 # ******************************************************************************************
 # *                               Declaración de Funciones                                 *
@@ -218,3 +219,41 @@ def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
 
 # ******************************************************************************************
 # ******************************************************************************************
+
+def gameAnalyzer(dados: list[int]) -> str:
+    """
+    Evalúa una lista de 5 valores de dados para determinar la jugada en el juego de la Generala.
+
+    Parámetros:
+        dados: Lista de 5 enteros entre 1 y 6 que representan los valores de los dados.
+
+    Retorno:
+        str: Descripción de la jugada obtenida.
+    """
+    # # Validar que la lista tenga exactamente 5 valores
+    # if not isinstance(dados, list) or len(dados) != 5:
+    #     raise ValueError("La entrada debe ser una lista de exactamente 5 valores.")
+    
+    # # Validar que todos los valores estén entre 1 y 6
+    # if any(d < 1 or d > 6 for d in dados):
+    #     raise ValueError("Todos los valores de los dados deben estar entre 1 y 6.")
+    
+    # Contar las ocurrencias de cada número
+    contador = Counter(dados)
+    valores = contador.values()
+    
+    # Determinar la jugada
+    # Fuente: https://www.lavoz.com.ar/viral/como-se-juega-la-generala/
+    if len(valores) == 1:
+        return "GENERALA"  # Todos los dados tienen el mismo valor
+    elif len(valores) == 2:
+        if 4 in valores:
+            return "POKER"  # Cuatro dados iguales y uno diferente
+        elif 3 in valores:
+            return "FULL"  # Tres dados iguales y dos diferentes
+    elif len(valores) == 5 and sorted(dados) in [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]:
+        return "ESCALERA"  # Secuencia de 5 números consecutivos
+    elif len(valores) == 5 and sorted(dados) in [[3, 4, 5, 6, 1]]:
+        return "ESCALERA AL AS"  # Secuencia de 5 números consecutivos
+    else:
+        return "NADA"  # No se forma ninguna jugada significativa
