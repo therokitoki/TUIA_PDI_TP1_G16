@@ -239,9 +239,10 @@ def gameAnalyzer(dados: list[int]) -> str:
     #     raise ValueError("Todos los valores de los dados deben estar entre 1 y 6.")
     
     # Contar las ocurrencias de cada número
+    print('Dados', dados)
     contador = Counter(dados)
     valores = contador.values()
-    
+    print('Valores', valores)
     # Determinar la jugada
     # Fuente: https://www.lavoz.com.ar/viral/como-se-juega-la-generala/
     if len(valores) == 1:
@@ -250,10 +251,10 @@ def gameAnalyzer(dados: list[int]) -> str:
         if 4 in valores:
             return "POKER"  # Cuatro dados iguales y uno diferente
         elif 3 in valores:
-            return "FULL"  # Tres dados iguales y dos diferentes
+            return "FULL"  # Dos grupos de dados iguales, uno de 3 y otro de 2.
     elif len(valores) == 5 and sorted(dados) in [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]:
         return "ESCALERA"  # Secuencia de 5 números consecutivos
-    elif len(valores) == 5 and sorted(dados) in [[3, 4, 5, 6, 1]]:
+    elif len(valores) == 5 and sorted(dados) in [[1, 3, 4, 5, 6]]:
         return "ESCALERA AL AS"  # Secuencia de 5 números consecutivos
     else:
         return "NADA"  # No se forma ninguna jugada significativa

@@ -79,8 +79,8 @@ for video in range(1, 5):
 
                             num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_l, 8, cv2.CV_32S)
 
-                            for stat in stats:
-                                dice_values.append(num_labels - 1)
+                            
+                            dice_values.append(num_labels - 1)
 
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             if not motion:
