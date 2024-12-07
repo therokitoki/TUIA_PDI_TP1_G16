@@ -19,6 +19,18 @@ import os
 
 os.makedirs("./frames", exist_ok = True)  # Si no existe, crea la carpeta 'frames' en el directorio actual.
 
+# Carga de las imágenes con los resultados
+poker = cv2.imread("./resultados_img/poker.png", cv2.IMREAD_UNCHANGED)  
+escalera = cv2.imread("./resultados_img/escalera.png", cv2.IMREAD_UNCHANGED)
+escalera_al_as = cv2.imread("./resultados_img/escalera_al_as.png", cv2.IMREAD_UNCHANGED) 
+full = cv2.imread("./resultados_img/full.png", cv2.IMREAD_UNCHANGED)  
+generala = cv2.imread("./resultados_img/generala.png", cv2.IMREAD_UNCHANGED)  
+nada = cv2.imread("./resultados_img/nada.png", cv2.IMREAD_UNCHANGED)  
+
+# Resize
+resize = lambda img: cv2.resize(img, dsize=(int(img.shape[1] / 4), int(img.shape[0] / 4)))
+poker, escalera, escalera_al_as, full, generala, nada = map(resize, [poker, escalera, escalera_al_as, full, generala, nada])
+
 # --- Leer un video --------------------------------------------
 for video in range(1, 5):
     cap = cv2.VideoCapture(f'./videos/tirada_{video}.mp4')  # Abre el archivo de video especificado ('tirada_1.mp4') para su lectura.
@@ -31,7 +43,8 @@ for video in range(1, 5):
     aux_mov = 0
     centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
     dice_values = [0, 0, 0, 0, 0]
-
+    
+    #poker = cv2.resize(poker, dsize=(int(poker.shape[1]/4), int(poker.shape[0]/4)))
     while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
         ret, frame = cap.read() # 'ret' indica si la lectura fue exitosa (True/False) y 'frame' contiene el contenido del frame si la lectura fue exitosa.
@@ -39,7 +52,7 @@ for video in range(1, 5):
         if ret == True:
             
             frame = cv2.resize(frame, dsize=(int(width/3), int(height/3))) # Redimensiona el frame capturado.
-            
+
             # Detección de Región de Interés (paño)
             if frame_number == 0:
                 x_ini, x_fin, y_ini, y_fin = roiDetect(img=frame, percent=5, thresh=110, save=False)
@@ -98,19 +111,38 @@ for video in range(1, 5):
                 if sum(dice_values) > 0:
                     result = gameAnalyzer(dice_values)
 
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    font_scale = 2
-                    thickness = 2
-
-                    # Calcular el tamaño del texto
-                    (text_width, text_height), baseline = cv2.getTextSize(f'{result}', font, font_scale, thickness)
-
                     # Calcular el punto de inicio para centrar el texto
-                    x = (frame.shape[1] - text_width) // 2  # Centro horizontal
-                    y = 650 # Centro vertical
+                    x = (frame.shape[1] - poker.shape[1]) // 2  # Centro horizontal, se utiliza el tamaño de uno de los resultados como referencia
+                    y = 550 # Centro vertical
+                    
+                    if result == "POKER":
+                        frame[y:y+ poker.shape[0], x:x+poker.shape[1]] = poker
+                    if result == "GENERALA":
+                        frame[y:y+ generala.shape[0], x:x+generala.shape[1]] = generala
+                    if result == "FULL":
+                        frame[y:y+ full.shape[0], x:x+full.shape[1]] = full
+                    if result == "ESCALERA":
+                        frame[y:y+ escalera.shape[0], x:x+escalera.shape[1]] = escalera
+                    if result == "ESCALERA AL AS":
+                        frame[y:y+ escalera_al_as.shape[0], x:x+escalera_al_as.shape[1]] = escalera_al_as
+                    if result == "NADA":
+                        frame[y:y+ nada.shape[0], x:x+nada.shape[1]] = nada
+                    
+                    
+                    # else:
+                    #     font = cv2.FONT_HERSHEY_SIMPLEX
+                    #     font_scale = 2
+                    #     thickness = 2
 
-                    # Escribir el texto en el centro de la imagen
-                    cv2.putText(frame, f'{result}', (x, y), font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
+                    #     # Calcular el tamaño del texto
+                    #     (text_width, text_height), baseline = cv2.getTextSize(f'{result}', font, font_scale, thickness)
+
+                    #     # Calcular el punto de inicio para centrar el texto
+                    #     x = (frame.shape[1] - text_width) // 2  # Centro horizontal
+                    #     y = 650 # Centro vertical
+
+                    #     # Escribir el texto en el centro de la imagen
+                    #     cv2.putText(frame, f'{result}', (x, y), font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
                   
 
             cv2.imshow('Frame', frame) # Imprime frame
