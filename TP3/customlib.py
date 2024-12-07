@@ -248,19 +248,19 @@ def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int
         raise ValueError("El parámetro 'img' debe ser una imagen en escala de grises (2 dimensiones).")
     
     # Validación del parámetro 'x_cord'
-    if not isinstance(x_cord, int) or (x_cord < 0):
+    if not isinstance(x_cord, (int, np.integer)) or (x_cord < 0):
         raise ValueError("El parámetro 'x_cord' debe ser un número entero positivo.")
     
     # Validación del parámetro 'y_cord'
-    if not isinstance(y_cord, int) or (y_cord < 0):
+    if not isinstance(y_cord, (int, np.integer)) or (y_cord < 0):
         raise ValueError("El parámetro 'y_cord' debe ser un número entero positivo.")
     
     # Validación del parámetro 'width'
-    if not isinstance(width, int) or (width < 0):
+    if not isinstance(width, (int, np.integer)) or (width < 0):
         raise ValueError("El parámetro 'width' debe ser un número entero positivo.")
     
     # Validación del parámetro 'height'
-    if not isinstance(height, int) or (height < 0):
+    if not isinstance(height, (int, np.integer)) or (height < 0):
         raise ValueError("El parámetro 'height' debe ser un número entero positivo.")
 
     # Validación de que las coordenadas y dimensiones estén dentro de los límites de la imagen

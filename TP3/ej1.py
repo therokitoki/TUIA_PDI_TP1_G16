@@ -46,13 +46,14 @@ for video in range(1, 5):
             if (frame_number) > 0: # Ver de Eliminar esto
                 frame_crop = frame[y_ini:y_fin, x_ini:x_fin]
 
-                frame_crop_bgr = cv2.cvtColor(frame_crop, cv2.COLOR_BGR2LAB)   #Incorporarlo en funciones
+                frame_crop_bgr = cv2.cvtColor(frame_crop, cv2.COLOR_BGR2LAB)   
 
-                L, A, B = cv2.split(frame_crop_bgr) # Incorporarlo en funciones
+                L, A, B = cv2.split(frame_crop_bgr) 
 
+                # Detección de Centroides
                 flag, centroids, stats = centroidsDetect(img=A, th_min=95, min_area=100, max_area=900, jump=1)
     
-                # Comparación de Centroides
+                # Deteccíon de Movimiento
                 motion = True
                 if flag:   # Se detectaron los 5 dados
                     motion = motionDetector(centroids_ant, centroids, thresh=1)
