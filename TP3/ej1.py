@@ -29,13 +29,14 @@ for video in range(1, 5):
     #print(fps)
     out = cv2.VideoWriter(f'./videos/tirada_{video}_Output.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
     frame_number = 0
+    aux_mov = 0  ####
     centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
     while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
         ret, frame = cap.read() # 'ret' indica si la lectura fue exitosa (True/False) y 'frame' contiene el contenido del frame si la lectura fue exitosa.
-
+        
         if ret == True:
-
+            
             frame = cv2.resize(frame, dsize=(int(width/3), int(height/3))) # Redimensiona el frame capturado.
             
             # Detección de Región de Interés (paño)
@@ -57,9 +58,21 @@ for video in range(1, 5):
                 motion = True
                 if flag:   # Se detectaron los 5 dados
                     motion = motionDetector(centroids_ant, centroids, thresh=1)
-                
+                    if not motion and aux_mov < 3:
+                        aux_mov += 1
+                            
                     centroids_ant = centroids
+
+                if motion and aux_mov > 0:
+                    aux_mov -= 1    
+
+                if aux_mov == 3:
+                    quieto = True
+                if aux_mov == 0:
+                    quieto = False    
                 
+                print('aux_mov: ', aux_mov)
+
                 ######
                 max_area = 900
                 min_area = 100
@@ -76,10 +89,12 @@ for video in range(1, 5):
                             dice_values.append(value)
 
                             font = cv2.FONT_HERSHEY_SIMPLEX
-                            if not motion:
+                            # if not motion:
+                            if quieto:
                                 cv2.putText(frame_crop, f'N {value}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
                                 
-                if not motion:
+                #if not motion:
+                if quieto:
                     result = gameAnalyzer(dice_values)
 
                     font = cv2.FONT_HERSHEY_SIMPLEX
