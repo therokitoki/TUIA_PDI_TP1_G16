@@ -25,12 +25,13 @@ for video in range(1, 5):
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # Obtiene el ancho del video en píxeles usando la propiedad CAP_PROP_FRAME_WIDTH.
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # Obtiene la altura del video en píxeles usando la propiedad CAP_PROP_FRAME_HEIGHT.
     fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) del video usando CAP_PROP_FPS.
-    # n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
-    #print(fps)
-    out = cv2.VideoWriter(f'./videos/tirada_{video}_Output.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
+    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
+    out = cv2.VideoWriter(f'./videos/resultado_tirada_{video}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
     frame_number = 0
     aux_mov = 0  ####
     centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
+    dice_values = [0, 0, 0, 0, 0]
+
     while (cap.isOpened()): # Verifica si el video se abrió correctamente.
 
         ret, frame = cap.read() # 'ret' indica si la lectura fue exitosa (True/False) y 'frame' contiene el contenido del frame si la lectura fue exitosa.
@@ -70,31 +71,31 @@ for video in range(1, 5):
                     quieto = True
                 if aux_mov == 0:
                     quieto = False    
-                
-                print('aux_mov: ', aux_mov)
 
                 ######
                 max_area = 900
                 min_area = 100
-                dice_values = []
+                pos_dado = 0
                 for stat in stats:
                     x,y,w,h,a = stat
                     if a < max_area and a > min_area:
                         if a < ((x_fin-x_ini)*(y_fin-y_ini)*0.95):
                             cv2.rectangle(frame_crop, (x, y), (x+w, y+h), (255, 0, 0), 1)
 
-                            # Obtención del valor del dado
-                            value = diceValue(img=L, x_cord=x, y_cord=y, width=w, height=h)    
-                            
-                            dice_values.append(value)
-
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             # if not motion:
                             if quieto:
-                                cv2.putText(frame_crop, f'N {value}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
                                 
-                #if not motion:
-                if quieto:
+                                if dice_values[pos_dado] == 0:
+                                    # Obtención del valor del dado
+                                    value = diceValue(img=L, x_cord=x, y_cord=y, width=w, height=h)
+                                    dice_values[pos_dado] = value
+
+                                cv2.putText(frame_crop, f'N {dice_values[pos_dado]}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+                                pos_dado += 1
+                                
+                # Si se tienen todos los valores
+                if sum(dice_values) > 0:
                     result = gameAnalyzer(dice_values)
 
                     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -106,15 +107,15 @@ for video in range(1, 5):
 
                     # Calcular el punto de inicio para centrar el texto
                     x = (frame.shape[1] - text_width) // 2  # Centro horizontal
-                    y = (frame.shape[0] + text_height) // 2  # Centro vertical
+                    y = 600 #(frame.shape[0] + text_height) // 2  # Centro vertical
 
                     # Escribir el texto en el centro de la imagen
                     cv2.putText(frame, f'{result}', (x, y), font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
                   
 
-            #frame = cv2.resize(frame, (width, height))
+            cv2.imshow('Frame', frame) # Imprime frame
+            frame = cv2.resize(frame, (width, height))
             out.write(frame)
-            cv2.imshow('Frame', frame) # Muestra el frame redimensionado.
 
             # cv2.imwrite(os.path.join("frames", f"frame_{frame_number}.jpg"), frame) # Guarda el frame en el archivo './frames/frame_{frame_number}.jpg'.
 
@@ -126,4 +127,5 @@ for video in range(1, 5):
     #print(frame_number)
 
     cap.release() # Libera el objeto 'cap', cerrando el archivo.
+    out.release() # Libera el objeto 'out', cerrando el archivo.
     cv2.destroyAllWindows() # Cierra todas las ventanas abiertas.

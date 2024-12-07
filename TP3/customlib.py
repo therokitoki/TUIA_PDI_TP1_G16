@@ -274,7 +274,7 @@ def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int
     _, thresh_img = cv2.threshold(img_crop, thresh=180, maxval=255, type=cv2.THRESH_BINARY)
 
     # Operaciones morfológicas
-    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2,2)) # Definición de Kernel
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3)) # Definición de Kernel
     thresh_img = cv2.morphologyEx(thresh_img, cv2.MORPH_OPEN, kernel_open) # Apertura
 
     # Detección de componentes conectadas.
