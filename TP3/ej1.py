@@ -28,7 +28,7 @@ for video in range(1, 5):
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
     out = cv2.VideoWriter(f'./videos/resultado_tirada_{video}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
     frame_number = 0
-    aux_mov = 0  ####
+    aux_mov = 0
     centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
     dice_values = [0, 0, 0, 0, 0]
 
@@ -72,7 +72,7 @@ for video in range(1, 5):
                 if aux_mov == 0:
                     quieto = False    
 
-                ######
+                # Recuadros y valores
                 max_area = 900
                 min_area = 100
                 pos_dado = 0
@@ -83,7 +83,7 @@ for video in range(1, 5):
                             cv2.rectangle(frame_crop, (x, y), (x+w, y+h), (255, 0, 0), 1)
 
                             font = cv2.FONT_HERSHEY_SIMPLEX
-                            # if not motion:
+                            # Si están quietos los cinco dados:
                             if quieto:
                                 
                                 if dice_values[pos_dado] == 0:
@@ -107,7 +107,7 @@ for video in range(1, 5):
 
                     # Calcular el punto de inicio para centrar el texto
                     x = (frame.shape[1] - text_width) // 2  # Centro horizontal
-                    y = 600 #(frame.shape[0] + text_height) // 2  # Centro vertical
+                    y = 650 # Centro vertical
 
                     # Escribir el texto en el centro de la imagen
                     cv2.putText(frame, f'{result}', (x, y), font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
@@ -117,14 +117,12 @@ for video in range(1, 5):
             frame = cv2.resize(frame, (width, height))
             out.write(frame)
 
-            # cv2.imwrite(os.path.join("frames", f"frame_{frame_number}.jpg"), frame) # Guarda el frame en el archivo './frames/frame_{frame_number}.jpg'.
-
             frame_number += 1
+
             if cv2.waitKey(25) & 0xFF == ord('q'): # Espera 25 milisegundos a que se presione una tecla. Si se presiona 'q' se rompe el bucle y se cierra la ventana.
                 break
         else:  
-            break  
-    #print(frame_number)
+            break 
 
     cap.release() # Libera el objeto 'cap', cerrando el archivo.
     out.release() # Libera el objeto 'out', cerrando el archivo.
