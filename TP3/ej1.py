@@ -25,11 +25,14 @@ escalera = cv2.imread("./resultados_img/escalera.png", cv2.IMREAD_UNCHANGED)
 escalera_al_as = cv2.imread("./resultados_img/escalera_al_as.png", cv2.IMREAD_UNCHANGED) 
 full = cv2.imread("./resultados_img/full.png", cv2.IMREAD_UNCHANGED)  
 generala = cv2.imread("./resultados_img/generala.png", cv2.IMREAD_UNCHANGED)  
-nada = cv2.imread("./resultados_img/nada.png", cv2.IMREAD_UNCHANGED)  
+nada = cv2.imread("./resultados_img/nada.png", cv2.IMREAD_UNCHANGED)
+
 
 # Resize
 resize = lambda img: cv2.resize(img, dsize=(int(img.shape[1] / 4), int(img.shape[0] / 4)))
 poker, escalera, escalera_al_as, full, generala, nada = map(resize, [poker, escalera, escalera_al_as, full, generala, nada])
+
+img_dict = {"GENERALA": generala, "POKER" : poker, "FULL" : full, "ESCALERA" : escalera, "ESCALERA AL AS" : escalera_al_as, "NADA" : nada}
 
 # --- Leer un video --------------------------------------------
 for video in range(1, 5):
@@ -39,8 +42,11 @@ for video in range(1, 5):
     fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) del video usando CAP_PROP_FPS.
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
     out = cv2.VideoWriter(f'./videos/resultado_tirada_{video}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
+    
+    # Inicialización de Variables
     frame_number = 0
     aux_mov = 0
+    quieto = False
     centroids_ant = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
     dice_values = [0, 0, 0, 0, 0]
     
@@ -80,10 +86,8 @@ for video in range(1, 5):
                 if motion and aux_mov > 0:
                     aux_mov -= 1    
 
-                if aux_mov == 3:
-                    quieto = True
-                if aux_mov == 0:
-                    quieto = False    
+                quieto = setReset(set=(aux_mov == 3), reset=(aux_mov == 0), q=quieto)
+                 
 
                 # Recuadros y valores
                 max_area = 900
@@ -113,21 +117,13 @@ for video in range(1, 5):
 
                     # Calcular el punto de inicio para centrar el texto
                     x = (frame.shape[1] - poker.shape[1]) // 2  # Centro horizontal, se utiliza el tamaño de uno de los resultados como referencia
-                    y = 550 # Centro vertical
+                    #y = 550 # Centro vertical
+                    y = round((frame.shape[0]) *0.75) # Centro vertical
                     
-                    if result == "POKER":
-                        frame[y:y+ poker.shape[0], x:x+poker.shape[1]] = poker
-                    if result == "GENERALA":
-                        frame[y:y+ generala.shape[0], x:x+generala.shape[1]] = generala
-                    if result == "FULL":
-                        frame[y:y+ full.shape[0], x:x+full.shape[1]] = full
-                    if result == "ESCALERA":
-                        frame[y:y+ escalera.shape[0], x:x+escalera.shape[1]] = escalera
-                    if result == "ESCALERA AL AS":
-                        frame[y:y+ escalera_al_as.shape[0], x:x+escalera_al_as.shape[1]] = escalera_al_as
-                    if result == "NADA":
-                        frame[y:y+ nada.shape[0], x:x+nada.shape[1]] = nada
-                    
+                    # Se inserta una imagen en función del resultado.
+                    insertPicture(img=frame, pict=img_dict, ref=result, x_cord=x, y_cord=y)
+
+                 
                     
                     # else:
                     #     font = cv2.FONT_HERSHEY_SIMPLEX

@@ -30,7 +30,7 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
         percent: Porcentaje del margen a ajustar en los bordes del rectángulo detectado.
                     Debe ser un número entero entre 1 y 25. Por defecto, es 5%.
         thresh: Valor de umbral para obtener una máscara binaria.            
-        save: Si se establece en 'True' guarda la imágen procesada en la carpeta `./frames`. 
+        save: Si se establece en 'True' guarda la imagen procesada en la carpeta `./frames`. 
 
     Retorno:
         Coordenadas del área detectada: (x_ini, x_fin, y_ini, y_fin).
@@ -73,7 +73,7 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
     x_fin = round(x+(w*(1 - percent/100)))
     y_fin = round(y+(h*(1 - percent/100)))
 
-    # Opcional: Se guarda la imágen procesada en la carpeta `./frames`.
+    # Opcional: Se guarda la imagen procesada en la carpeta `./frames`.
     if save:
         os.makedirs("./frames", exist_ok = True)  # Si no existe, crea la carpeta 'frames' en el directorio actual.
 
@@ -91,10 +91,10 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
 
 def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: int=1, jump: int=1) -> tuple[bool, list, list]:
     """
-    Devuelve los centroides y estadísticas de determinadas componentes conectadas detectadas en una imágen. 
+    Devuelve los centroides y estadísticas de determinadas componentes conectadas detectadas en una imagen. 
     
     Parámetros:
-        img: Imágen de entrada.
+        img: Imagen de entrada.
         th_min: Valor de umbral inicial para obtener una máscara binaria.
         min_area: Área mínima que debe tener una componente conectada para ser considerada válida.
         max_area: Área máxima que puede tener una componente conectada para ser considerada válida. Debe ser menor o igual al área total de la imagen.
@@ -119,7 +119,7 @@ def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: i
         raise ValueError("El parámetro 'th_min' debe ser un número entero entre 1 y 255.")
     
     # Validación del parámetro 'max_area'
-    img_area = img.shape[0] * img.shape[1] # Area de la imágen
+    img_area = img.shape[0] * img.shape[1] # Area de la imagen
     if not isinstance(max_area, int) or not (1 <= max_area <= img_area):
         raise ValueError("El parámetro 'max_area' debe ser un número entero menor al area de la imagen.")
             
@@ -215,7 +215,7 @@ def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
         x2, y2 = act[i]
 
         # Verifico si el desplazamiento está por debajo del umbral en ambas coordenadas.
-        if (x2 - x1) < thresh and (y2 - y1) < thresh:
+        if abs(x2 - x1) < thresh and abs(y2 - y1) < thresh:
             cont += 1
     
     # Si todos los centroides tienen desplazamientos inferiores al umbral, no hay movimiento.
@@ -244,9 +244,7 @@ def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int
     # Validación de 'img'
     if not isinstance(img, np.ndarray):
         raise ValueError("El parámetro 'img' debe ser una imagen de tipo numpy.ndarray.")
-    if len(img.shape) != 2:
-        raise ValueError("El parámetro 'img' debe ser una imagen en escala de grises (2 dimensiones).")
-    
+        
     # Validación del parámetro 'x_cord'
     if not isinstance(x_cord, (int, np.integer)) or (x_cord < 0):
         raise ValueError("El parámetro 'x_cord' debe ser un número entero positivo.")
@@ -325,3 +323,88 @@ def gameAnalyzer(dados: list[int]) -> str:
         return "ESCALERA AL AS"  # Secuencia de 5 números consecutivos
     else:
         return "NADA"  # No se forma ninguna jugada significativa
+
+# ******************************************************************************************
+# ******************************************************************************************
+
+def setReset(set: bool, reset: bool, q: bool = False) -> bool:
+    """
+    Implementa un latch SR básico.
+
+    Parámetros:
+        set: Señal de entrada para establecer el estado a True.
+        reset: Señal de entrada para reiniciar el estado a False.
+        q: Estado anterior.
+
+    Retorno:
+        bool: El nuevo estado de salida (q).
+    """
+    # Validación de 'set'
+    if not isinstance(set, bool):
+        raise ValueError("El parámetro 'set' debe ser de tipo bool.")
+    
+    # Validación de 'reset'
+    if not isinstance(reset, bool):
+        raise ValueError("El parámetro 'reset' debe ser de tipo bool.")
+    
+    # Validación de 'q'
+    if not isinstance(q, bool):
+        raise ValueError("El parámetro 'q' debe ser de tipo bool.")
+    
+    # Validación de estados simultáneos
+    if set and reset:
+        raise ValueError("Condición inválida: ambas señales 'set' y 'reset' no pueden estar activas al mismo tiempo.")
+    
+    # Evaluación y Retorno
+    return set or (q and not reset)
+
+# ******************************************************************************************
+# ******************************************************************************************
+
+def insertPicture(img: np.ndarray, pict: dict, ref: str, x_cord: int=0, y_cord: int=0) -> None:
+    """
+    Inserta una imagen dentro de otra, asegurando que las dimensiones sean compatibles.
+    
+    Parámetros:
+        img: Imagen base donde se insertará la nueva imagen.
+        pict: Diccionario que contiene imágenes de referencia.
+        ref: Clave de la imagen que se desea insertar.
+        x_cord: Coordenada X superior izquierda para insertar la imagen.
+        y_cord: Coordenada Y superior izquierda para insertar la imagen.
+    """
+    # Validación de 'img'
+    if not isinstance(img, np.ndarray):
+        raise ValueError("El parámetro 'img' debe ser una imagen de tipo numpy.ndarray.")
+    
+    # Validación del parámetro 'x_cord'
+    if not isinstance(x_cord, (int, np.integer)) or (x_cord < 0):
+        raise ValueError("El parámetro 'x_cord' debe ser un número entero positivo.")
+    
+    # Validación del parámetro 'y_cord'
+    if not isinstance(y_cord, (int, np.integer)) or (y_cord < 0):
+        raise ValueError("El parámetro 'y_cord' debe ser un número entero positivo.")
+    
+    # Validación de 'ref'
+    if not isinstance(ref, str):
+        raise ValueError("El parámetro 'ref' debe ser de tipo string.")
+
+    # Verificar que la referencia exista en el diccionario
+    if ref not in pict:
+        raise ValueError(f"No existe una imagen de referencia para '{ref}'")
+
+    img_aux = pict[ref]
+
+    # Validar que las dimensiones sean compatibles
+    available_height = img.shape[0] - y_cord
+    available_width = img.shape[1] - x_cord
+
+    if img_aux.shape[0] > available_height or img_aux.shape[1] > available_width:
+        raise ValueError(
+            f"La imagen de referencia '{ref}' es demasiado grande para ser insertada en las coordenadas ({x_cord}, {y_cord})."
+            f"Espacio disponible: ({available_height}, {available_width}). "
+            f"Tamaño de la imagen: ({img_aux.shape[0]}, {img_aux.shape[1]})."
+        )
+
+    # Insertar la imagen
+    img[y_cord:y_cord + img_aux.shape[0], x_cord:x_cord + img_aux.shape[1]] = img_aux
+
