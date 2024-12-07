@@ -36,6 +36,10 @@ def roiDetect(img: np.ndarray, percent: int=5, thresh: int=100, save: bool=False
         Coordenadas del área detectada: (x_ini, x_fin, y_ini, y_fin).
  
     """
+    # Validación del parámetro 'img'
+    if not isinstance(img, np.ndarray):
+        raise ValueError("El parámetro 'img' debe ser una imagen de tipo numpy.ndarray.")
+    
     # Validación del parámetro 'percentage'
     if not isinstance(percent, int) or not (1 <= percent <= 25):
         raise ValueError("El parámetro 'porc' debe ser un número entero entre 1 y 25.")
@@ -106,6 +110,9 @@ def centroidsDetect(img: np.ndarray, th_min: int=1, min_area: int=0, max_area: i
             - Alto.
             - Área.
     """
+    # Validación del parámetro 'img'
+    if not isinstance(img, np.ndarray):
+        raise ValueError("El parámetro 'img' debe ser una imagen de tipo numpy.ndarray.")
     
     # Validación del parámetro 'th_min'
     if not isinstance(th_min, int) or not (1 <= th_min <= 255):
@@ -234,6 +241,31 @@ def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int
     Retorno:
         value: Número de puntos detectados en el dado (valor del dado).
     """
+    # Validación de 'img'
+    if not isinstance(img, np.ndarray):
+        raise ValueError("El parámetro 'img' debe ser una imagen de tipo numpy.ndarray.")
+    if len(img.shape) != 2:
+        raise ValueError("El parámetro 'img' debe ser una imagen en escala de grises (2 dimensiones).")
+    
+    # Validación del parámetro 'x_cord'
+    if not isinstance(x_cord, int) or (x_cord < 0):
+        raise ValueError("El parámetro 'x_cord' debe ser un número entero positivo.")
+    
+    # Validación del parámetro 'y_cord'
+    if not isinstance(y_cord, int) or (y_cord < 0):
+        raise ValueError("El parámetro 'y_cord' debe ser un número entero positivo.")
+    
+    # Validación del parámetro 'width'
+    if not isinstance(width, int) or (width < 0):
+        raise ValueError("El parámetro 'width' debe ser un número entero positivo.")
+    
+    # Validación del parámetro 'height'
+    if not isinstance(height, int) or (height < 0):
+        raise ValueError("El parámetro 'height' debe ser un número entero positivo.")
+
+    # Validación de que las coordenadas y dimensiones estén dentro de los límites de la imagen
+    if x_cord + width > img.shape[1] or y_cord + height > img.shape[0]:
+        raise ValueError("La región de interés (ROI) excede los límites de la imagen.")
 
     # Recorte de la región de interés (ROI) de la imagen según las coordenadas y dimensiones dadas.
     img_crop = img[y_cord:y_cord+height, x_cord:x_cord+width]
@@ -250,7 +282,7 @@ def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int
 
     # Cálculo del valor detectado
     value = num_labels - 1
-    
+
     return value
 
 # ******************************************************************************************
