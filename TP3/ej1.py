@@ -17,7 +17,8 @@ from sqlalchemy import false
 from customlib import *
 import os
 
-os.makedirs("./frames", exist_ok = True)  # Si no existe, crea la carpeta 'frames' en el directorio actual.
+# Se crea la carpeta 'frames' en el directorio actual (si no existe).
+os.makedirs("./frames", exist_ok = True)  
 
 # Carga de las imágenes con los resultados
 poker = cv2.imread("./resultados_img/poker.png", cv2.IMREAD_UNCHANGED)  
@@ -33,13 +34,15 @@ poker, escalera, escalera_al_as, full, generala, nada = map(resize, [poker, esca
 
 img_dict = {"GENERALA": generala, "POKER" : poker, "FULL" : full, "ESCALERA" : escalera, "ESCALERA AL AS" : escalera_al_as, "NADA" : nada}
 
-# --- Leer un video --------------------------------------------
 for video in range(1, 5):
-    cap = cv2.VideoCapture(f'./videos/tirada_{video}.mp4')  # Abre el archivo de video especificado ('tirada_1.mp4') para su lectura.
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # Obtiene el ancho del video en píxeles usando la propiedad CAP_PROP_FRAME_WIDTH.
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # Obtiene la altura del video en píxeles usando la propiedad CAP_PROP_FRAME_HEIGHT.
-    fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) del video usando CAP_PROP_FPS.
-    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video usando CAP_PROP_FRAME_COUNT.
+    # Lectura de un video
+    cap = cv2.VideoCapture(f'./videos/tirada_{video}.mp4')  # Abre el archivo de video especificado para su lectura.
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # Obtiene el ancho del video en píxeles.
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # Obtiene la altura del video en píxeles.
+    fps = int(cap.get(cv2.CAP_PROP_FPS))  # Obtiene los cuadros por segundo (FPS) del video.
+    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) # Obtiene el número total de frames en el video.
+
+    # Creación de un objeto cv2.VideoWriter para la escritura de un video.
     out = cv2.VideoWriter(f'./videos/resultado_tirada_{video}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width,height))
     
     # Inicialización de Variables

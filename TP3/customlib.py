@@ -388,13 +388,13 @@ def insertPicture(img: np.ndarray, pict: dict, ref: str, x_cord: int=0, y_cord: 
     if not isinstance(ref, str):
         raise ValueError("El parámetro 'ref' debe ser de tipo string.")
 
-    # Verificar que la referencia exista en el diccionario
+    # Se verifica que la referencia exista en el diccionario
     if ref not in pict:
         raise ValueError(f"No existe una imagen de referencia para '{ref}'")
 
     img_aux = pict[ref]
 
-    # Validar que las dimensiones sean compatibles
+    # Se valida que las dimensiones sean compatibles
     available_height = img.shape[0] - y_cord
     available_width = img.shape[1] - x_cord
 
@@ -405,6 +405,6 @@ def insertPicture(img: np.ndarray, pict: dict, ref: str, x_cord: int=0, y_cord: 
             f"Tamaño de la imagen: ({img_aux.shape[0]}, {img_aux.shape[1]})."
         )
 
-    # Insertar la imagen
+    # Se inserta la imagen
     img[y_cord:y_cord + img_aux.shape[0], x_cord:x_cord + img_aux.shape[1]] = img_aux
 
