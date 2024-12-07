@@ -296,19 +296,19 @@ def gameAnalyzer(dados: list[int]) -> str:
     Retorno:
         str: Descripción de la jugada obtenida.
     """
-    # # Validar que la lista tenga exactamente 5 valores
+    # # Se valida que la lista tenga exactamente 5 valores
     # if not isinstance(dados, list) or len(dados) != 5:
     #     raise ValueError("La entrada debe ser una lista de exactamente 5 valores.")
     
-    # # Validar que todos los valores estén entre 1 y 6
+    # # Se valida que todos los valores estén entre 1 y 6
     # if any(d < 1 or d > 6 for d in dados):
     #     raise ValueError("Todos los valores de los dados deben estar entre 1 y 6.")
     
-    # Contar las ocurrencias de cada número
+    # Se contabilizan las ocurrencias de cada número
     contador = Counter(dados)
     valores = contador.values()
     
-    # Determinar la jugada
+    # Se determina la jugada
     # Fuente: https://www.lavoz.com.ar/viral/como-se-juega-la-generala/
     if len(valores) == 1:
         return "GENERALA"  # Todos los dados tienen el mismo valor
