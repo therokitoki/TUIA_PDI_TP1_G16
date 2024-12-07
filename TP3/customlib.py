@@ -220,6 +220,42 @@ def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
 # ******************************************************************************************
 # ******************************************************************************************
 
+def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int) -> int:
+    """
+    Calcula el valor de un dado en una imagen contando los puntos detectados. 
+    
+    Parámetros:
+        img: Imagen de entrada.
+        x_cord: Coordenada X superior izquierda de la ROI.
+        y_cord: Coordenada Y superior izquierda de la ROI.
+        width: Ancho de la ROI.
+        height: Altura de la ROI.
+
+    Retorno:
+        value: Número de puntos detectados en el dado (valor del dado).
+    """
+
+    # Recorte de la región de interés (ROI) de la imagen según las coordenadas y dimensiones dadas.
+    img_crop = img[y_cord:y_cord+height, x_cord:x_cord+width]
+
+    # Umbralado de la ROI
+    _, thresh_img = cv2.threshold(img_crop, thresh=180, maxval=255, type=cv2.THRESH_BINARY)
+
+    # Operaciones morfológicas
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2,2)) # Definición de Kernel
+    thresh_img = cv2.morphologyEx(thresh_img, cv2.MORPH_OPEN, kernel_open) # Apertura
+
+    # Detección de componentes conectadas.
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img, 8, cv2.CV_32S)
+
+    # Cálculo del valor detectado
+    value = num_labels - 1
+    
+    return value
+
+# ******************************************************************************************
+# ******************************************************************************************
+
 def gameAnalyzer(dados: list[int]) -> str:
     """
     Evalúa una lista de 5 valores de dados para determinar la jugada en el juego de la Generala.
@@ -239,10 +275,9 @@ def gameAnalyzer(dados: list[int]) -> str:
     #     raise ValueError("Todos los valores de los dados deben estar entre 1 y 6.")
     
     # Contar las ocurrencias de cada número
-    print('Dados', dados)
     contador = Counter(dados)
     valores = contador.values()
-    print('Valores', valores)
+    
     # Determinar la jugada
     # Fuente: https://www.lavoz.com.ar/viral/como-se-juega-la-generala/
     if len(valores) == 1:

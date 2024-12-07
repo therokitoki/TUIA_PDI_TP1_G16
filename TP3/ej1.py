@@ -46,9 +46,9 @@ for video in range(1, 5):
             if (frame_number) > 0: # Ver de Eliminar esto
                 frame_crop = frame[y_ini:y_fin, x_ini:x_fin]
 
-                frame_crop_bgr = cv2.cvtColor(frame_crop, cv2.COLOR_BGR2LAB)
+                frame_crop_bgr = cv2.cvtColor(frame_crop, cv2.COLOR_BGR2LAB)   #Incorporarlo en funciones
 
-                L, A, B = cv2.split(frame_crop_bgr)
+                L, A, B = cv2.split(frame_crop_bgr) # Incorporarlo en funciones
 
                 flag, centroids, stats = centroidsDetect(img=A, th_min=95, min_area=100, max_area=900, jump=1)
     
@@ -69,22 +69,14 @@ for video in range(1, 5):
                         if a < ((x_fin-x_ini)*(y_fin-y_ini)*0.95):
                             cv2.rectangle(frame_crop, (x, y), (x+w, y+h), (255, 0, 0), 1)
 
-                            frame_l_crop = L[y:y+h, x:x+w]
-
-                            _, thresh_img_l = cv2.threshold(frame_l_crop, thresh=180, maxval=255, type=cv2.THRESH_BINARY)
+                            # Obtención del valor del dado
+                            value = diceValue(img=L, x_cord=x, y_cord=y, width=w, height=h)    
                             
-                            kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2,2))
-                            
-                            thresh_img_l = cv2.morphologyEx(thresh_img_l, cv2.MORPH_OPEN, kernel_open)
-
-                            num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh_img_l, 8, cv2.CV_32S)
-
-                            
-                            dice_values.append(num_labels - 1)
+                            dice_values.append(value)
 
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             if not motion:
-                                cv2.putText(frame_crop, f'N {num_labels-1}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+                                cv2.putText(frame_crop, f'N {value}', (x, y-5), font, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
                                 
                 if not motion:
                     result = gameAnalyzer(dice_values)
@@ -98,9 +90,9 @@ for video in range(1, 5):
 
                     # Calcular el punto de inicio para centrar el texto
                     x = (frame.shape[1] - text_width) // 2  # Centro horizontal
-                    y = (frame.shape[0] + text_height) // 2  # Centro vertical (considerando que y coordina la línea base)
+                    y = (frame.shape[0] + text_height) // 2  # Centro vertical
 
-                    # Escribir el texto en el centro
+                    # Escribir el texto en el centro de la imagen
                     cv2.putText(frame, f'{result}', (x, y), font, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
                   
 
