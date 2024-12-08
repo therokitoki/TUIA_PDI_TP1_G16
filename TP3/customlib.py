@@ -215,7 +215,7 @@ def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
         x2, y2 = act[i]
 
         # Verifico si el desplazamiento está por debajo del umbral en ambas coordenadas.
-        if abs(x2 - x1) < thresh and abs(y2 - y1) < thresh:
+        if np.sqrt((x2 - x1)**2 + (y2 - y1)**2) < thresh:
             cont += 1
     
     # Si todos los centroides tienen desplazamientos inferiores al umbral, no hay movimiento.
