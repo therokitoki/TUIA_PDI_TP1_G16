@@ -214,7 +214,7 @@ def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
         x1, y1 = ant[i]
         x2, y2 = act[i]
 
-        # Verifico si el desplazamiento está por debajo del umbral en ambas coordenadas.
+        # Verifico si el desplazamiento está por debajo del umbral.
         if np.sqrt((x2 - x1)**2 + (y2 - y1)**2) < thresh:
             cont += 1
     
@@ -229,7 +229,7 @@ def motionDetector(ant: list, act: list, thresh: float=5) -> bool:
 
 def diceValue(img: np.ndarray, x_cord: int, y_cord: int, width: int, height: int) -> int:
     """
-    Calcula el valor de un dado en una imagen contando los puntos detectados. 
+    Calcula el valor de un dado en una imagen a partir del conteo de puntos en su superficie. 
     
     Parámetros:
         img: Imagen de entrada.
