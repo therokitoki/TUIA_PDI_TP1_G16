@@ -1,0 +1,7 @@
+numpy==2.1.0
+matplotlib==3.9.2
+opencv-contrib-python==4.10.0.84
+pillow==10.4.0
+seaborn==0.13.2
+imutils==0.5.4
+SQLAlchemy==2.0.36
