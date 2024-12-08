@@ -75,3 +75,30 @@ cd *Ruta de la carpeta que contiene los archivos del repositorio*
 .\.venv\Scripts\activate
 python ej2.py
 ```
+
+---
+
+## Trabajo Práctico N°3
+
+
+## Requisitos previos
+- Descargue los contenidos del repositorio en la ruta que prefiera (tome nota de la ruta que deberá ser usada más adelante).
+- Abra una ventana de comandos (CMD) e ingrese los siguientes comandos:
+```bash
+cd *Ruta de la carpeta que contiene los archivos del repositorio y agregar \TP3*
+python -m venv ./.venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Ejecución
+
+- Abra una ventana de comandos (CMD) e ingrese los siguientes comandos, según el problema que quiera ejecutar:
+
+### Problema 1
+
+```bash
+cd *Ruta de la carpeta que contiene los archivos del repositorio*
+.\.venv\Scripts\activate
+python ej1.py
+```
